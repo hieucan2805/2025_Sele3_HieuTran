@@ -6,13 +6,11 @@ import java.util.ResourceBundle;
 public class LocatorHelper {
     private final ResourceBundle localBundle;
 
-    private  final String language = URLHelper.getLanguage();
+    protected final String language = URLHelper.getLanguage();
 
     // Initialize by loading the localization files
-
-
     public LocatorHelper(String page) {
-        localBundle = ResourceBundle.getBundle((STR."localization.\{page.toLowerCase()}"), Locale.of(language));
+        localBundle = ResourceBundle.getBundle("localization." + page.toLowerCase(), new Locale(language));
     }
 
     /**
@@ -22,7 +20,12 @@ public class LocatorHelper {
      * @return Localization value
      */
     public  String getLocalizedText(String key) {
-        return localBundle.getString(key);
+        try {
+            return localBundle.getString(key);
+        } catch (java.util.MissingResourceException e) {
+            // If the key is not found, return a placeholder or an error message
+            return "!" + key + "!";
+        }
     }
 
     /**
@@ -38,4 +41,3 @@ public class LocatorHelper {
     }
 
 }
-
