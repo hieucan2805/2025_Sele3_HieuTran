@@ -6,14 +6,24 @@ import org.slf4j.LoggerFactory;
 
 import static java.lang.invoke.MethodHandles.lookup;
 
-public class URLHelper {
+public class LanguageHelper {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
-
     static PropertiesReader properties = new PropertiesReader("selenide.properties");
 
     public static String getLanguage() {
         return properties.getProperty("language", "en");
     }
+
+//    public static String getLocalizedURL() {
+//        String baseUrl = properties.getProperty("baseUrl","");
+//        // Check and concat URL
+//        if (!baseUrl.endsWith("/")) {
+//            baseUrl += "/";
+//        }
+//
+//        return baseUrl + getLanguage();
+//    }
+
 
     public static String getTestSuite() {
         return System.getProperty("test.suite", "vietjet").toLowerCase();
@@ -49,6 +59,8 @@ public class URLHelper {
             return baseUrl + getLanguage();
         }
 
+        System.out.println(baseUrl);
         return baseUrl;
     }
+
 }

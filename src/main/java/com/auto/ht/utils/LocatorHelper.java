@@ -1,16 +1,38 @@
 package com.auto.ht.utils;
 
 import java.util.Locale;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public class LocatorHelper {
     private final ResourceBundle localBundle;
 
-    protected final String language = URLHelper.getLanguage();
+    protected final String language = LanguageHelper.getLanguage();
 
-    // Initialize by loading the localization files
+    // Initialize by loading the localization files with UTF-8 support
     public LocatorHelper(String page) {
-        localBundle = ResourceBundle.getBundle("localization." + page.toLowerCase(), Locale.forLanguageTag(language));
+        String bundleName = "localization/" + page.toLowerCase();
+        Locale locale = Locale.forLanguageTag(language);
+        ResourceBundle bundle;
+        try {
+            String resourcePath = bundleName + "_" + locale.getLanguage() + ".properties";
+            java.io.InputStream stream = getClass().getClassLoader().getResourceAsStream(resourcePath);
+            if (stream != null) {
+                try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+                    bundle = new PropertyResourceBundle(reader);
+                }
+            } else {
+                // fallback to default ResourceBundle if file not found
+                bundle = ResourceBundle.getBundle(bundleName, locale);
+            }
+        } catch (IOException e) {
+            // fallback to default ResourceBundle if error
+            bundle = ResourceBundle.getBundle(bundleName, locale);
+        }
+        this.localBundle = bundle;
     }
 
     /**
