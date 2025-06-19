@@ -10,7 +10,7 @@ public class LocatorHelper {
 
     // Initialize by loading the localization files
     public LocatorHelper(String page) {
-        localBundle = ResourceBundle.getBundle("localization." + page.toLowerCase(), new Locale(language));
+        localBundle = ResourceBundle.getBundle("localization." + page.toLowerCase(), Locale.forLanguageTag(language));
     }
 
     /**
