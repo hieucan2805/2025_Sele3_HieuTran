@@ -6,18 +6,27 @@ This project is built using Maven and designed to run automated UI tests using S
 
 
 ## Features
-### Automation Test design (design test case & design framework)
-| Feature                                                                                    | Information                                                                                                                                                                                                                     | Status                                           |
-|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
-| Framework design (req. for level 2: understand and use the existing framework effectively) | Provide wrappers for Selenium WebDriver and WebElement original classes (applied approximated design pattern such as Factory)                                                                                                   | <span style="color: red;">Not Implemented</span> |
-|                                                                                            | Provide wrapper classes to centralize customized code for handling different behaviors, requirements of OS/Platforms, Browsers and Controls. (e.g.: Windows, macOS, Chrome, Firefox, pop up, iframe, customized controls, etc.) | <span style="color: red;">Not Implemented</span> |
-|                                                                                            | Provide DAO                                                                                                                                                                                                                     | <span style="color: red;">Not Implemented</span> |
-|                                                                                            | Have HTML execution report (can apply TestNG/Java or Pytest/Python or NUnit/C# or any 3rd better external library)                                                                                                              | <span style="color: red;">Not Implemented</span> |
-|                                                                                            | Provide utility functions (such as: drag and drop, type, move mouse, check/uncheck combo-box, type and select combo-box...)                                                                                                     | <span style="color: red;">Not Implemented</span> |
-|                                                                                            | Handle multiple browser instances concurrently so that the test can run without stepping into each other.                                                                                                                       | <span style="color: red;">Not Implemented</span> |
-|                                                                                            | Provide a way to run tests in parallel (e.g. using TestNG, JUnit, or any other framework)                                                                                                                                       | <span style="color: red;">Not Implemented</span> |
-|                                                                                            |                                                                                                                                                                                                                                 |                                                  |
-| Test case design                                                                           | Checkpoints are implemented properly. The results correctly reflect AUT's status, no wrong passed/failed                                                                                                                        | <span style="color: red;">Not Implemented</span> |
-|                                                                                            | Test cases are well organized in corresponding test suite/folder.                                                                                                                                                               | <span style="color: red;">Not Implemented</span> |
-|                                                                                            | Test cases use Page objects' methods instead of WebDriver's methods directly                                                                                                                                                    | <span style="color: red;">Not Implemented</span> |
-### Selenide FW 
+| Feature                                     | Status                                              | Note                          |
+|---------------------------------------------|-----------------------------------------------------|-------------------------------|
+| Selenide FW                                 | <span style="color: cyan;">In - Progress</span>     | JAVA 21, Selenide 7.9.3       |
+| Reports with HTML, Allure and Report Portal | <span style="color: cyan;">In - Progress</span>     |                               |
+| Test retry                                  | <span style="color: cyan;">In - Progress</span>     |                               |
+| Parallel/distributed testing                | <span style="color: red;">Not Implemented</span>    |                               |
+| Cross browsers testing                      | <span style="color: cyan;">In - Progress</span>     | Microsoft Edge, Google Chorme |
+| Selenium Grid/Shard                         | <span style="color: red;">Not Implemented</span>    |                               |
+| CI                                          | <span style="color: red;">Not Implemented</span>    |                               |
+| Content testing                             | <span style="color: red;">Not Implemented</span>    |                               |
+| Multiple languages testing                  | <span style="color: cyan;">In - Progress</span>     |                               |
+| Group tests by purposes                     | <span style="color: red;">Not Implemented</span>    |                               |
+| Source control practice                     | <span style="color: red;">Not Implemented</span>    |                               |
+| Switch test environment                     | <span style="color: red;">Not Implemented</span>    |                               |
+| Wrap custom controls                        | <span style="color: red;">Not Implemented</span>    |                               |
+                                                                              | Test cases use Page objects' methods instead of WebDriver's methods directly                                                                                                                                                    | <span style="color: red;">Not Implemented</span>    |
+
+
+
+### Selenide FW
+
+### Templates Report    
+HTML: xdg-open testng-report/index.html
+Allure: mvn allure:serve

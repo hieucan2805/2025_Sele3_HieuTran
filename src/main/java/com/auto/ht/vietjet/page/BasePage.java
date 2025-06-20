@@ -1,9 +1,7 @@
 package com.auto.ht.vietjet.page;
 
-import com.auto.ht.utils.Constants;
 import com.auto.ht.utils.LanguageHelper;
 import com.codeborne.selenide.SelenideElement;
-import com.codeborne.selenide.ex.UIAssertionError;
 import io.qameta.allure.Step;
 import org.slf4j.LoggerFactory;
 

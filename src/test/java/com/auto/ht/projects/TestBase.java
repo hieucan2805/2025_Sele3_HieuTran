@@ -9,7 +9,7 @@ import io.qameta.allure.selenide.AllureSelenide;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
 import static com.codeborne.selenide.Selenide.getUserAgent;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
@@ -20,24 +20,37 @@ import static com.github.automatedowl.tools.AllureEnvironmentWriter.allureEnviro
 public class TestBase {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
 
-    @BeforeClass
-    public void BeforeClass() {
+    // Run this once per method instead of once per class to ensure each test gets a clean browser instance
+    @BeforeMethod
+    public void setup() {
         DriverFactory.setupDriver();
         SelenideLogger.addListener("AllureSelenide", new AllureSelenide().screenshots(true).savePageSource(true));
-        log.info("Start {} TestNG testcases in {}", getClass().getName(), Configuration.browser);
+        log.info("Thread ID: {} - Starting {} test method in {}",
+                Thread.currentThread().getId(),
+                getClass().getName(),
+                Configuration.browser);
     }
 
     @AfterMethod
     public void tearDown() {
-        allureEnvironmentWriter(
-                ImmutableMap.<String, String>builder()
-                        .put("BASE_URL", Configuration.baseUrl)
-                        .put("WebDriver", String.valueOf(getWebDriver()))
-                        .put("UserAgent", getUserAgent())
-                        .put("isHeadless", String.valueOf(isHeadless()))
-                        .build(), System.getProperty("user.dir") + "/allure-results/");
+        try {
+            log.info("Thread ID: {} - Finishing test method and cleaning up", Thread.currentThread().getId());
 
-        // Close the browser after each test
-        Selenide.closeWebDriver();
+            // Only write environment data if WebDriver exists
+            if (getWebDriver() != null) {
+                allureEnvironmentWriter(
+                        ImmutableMap.<String, String>builder()
+                                .put("BASE_URL", Configuration.baseUrl)
+                                .put("WebDriver", String.valueOf(getWebDriver()))
+                                .put("UserAgent", getUserAgent())
+                                .put("isHeadless", String.valueOf(isHeadless()))
+                                .build(), System.getProperty("user.dir") + "/allure-results/");
+            }
+        } catch (Exception e) {
+            log.error("Error in tearDown: {}", e.getMessage());
+        } finally {
+            // Close the browser after each test
+            Selenide.closeWebDriver();
+        }
     }
 }

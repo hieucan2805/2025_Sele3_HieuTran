@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="Selenide Test Suite">
+<suite name="Parallel Test Suite" parallel="tests" thread-count="2">
     <listeners>
-<!--        <listener class-name="com.auto.listeners.htt.AllureListener"/>-->
         <listener class-name="com.auto.ht.projects.listeners.RetryListener"/>
     </listeners>
-    <test name="Selenide test">
+
+    <test name="Test 1">
         <classes>
             <class name="com.auto.ht.projects.vietjet.TestCase001"/>
         </classes>
     </test>
+
+    <test name="Test 2">
+        <classes>
+            <class name="com.auto.ht.projects.vietjet.TestCase002"/>
+        </classes>
+    </test>
 </suite>
+
