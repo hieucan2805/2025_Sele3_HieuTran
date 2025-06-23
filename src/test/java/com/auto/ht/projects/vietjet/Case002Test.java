@@ -1,14 +1,14 @@
 package com.auto.ht.projects.vietjet;
 
-import com.auto.ht.projects.TestBase;
+import com.auto.ht.base.BaseTest;
 import com.auto.ht.vietjet.page.HomePage;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import static com.codeborne.selenide.Selenide.sleep;
 
-public class TestCase002 extends TestBase {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(TestCase002.class);
+public class Case002Test extends BaseTest {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(Case002Test.class);
     private final HomePage homePage = new HomePage();
 
     @Test

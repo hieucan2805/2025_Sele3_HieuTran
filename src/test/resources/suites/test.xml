@@ -7,7 +7,7 @@
     </listeners>
     <test name="Selenide test">
         <classes>
-            <class name="com.auto.ht.projects.vietjet.TestCase001"/>
+            <class name="com.auto.ht.projects.vietjet.Case001Test"/>
         </classes>
     </test>
 </suite>
