@@ -32,16 +32,14 @@ public class LanguageHelper {
 
     public static String getBaseURL() {
         String testSuite = getTestSuite();
-        String baseUrl;
-
-        if ("vietjet".equals(testSuite)) {
-            baseUrl = properties.getProperty("baseUrl.vj", "https://vietjetair.com");
-        } else if ("leapfrog".equals(testSuite)) {
-            baseUrl = properties.getProperty("baseUrl.lf", "");
-        } else {
-            log.warn("Unknown test suite: {}. Defaulting to Vietjet base URL.", testSuite);
-            baseUrl = properties.getProperty("baseUrl.vj", "https://vietjetair.com");
-        }
+        String baseUrl = switch (testSuite) {
+            case "vietjet" -> properties.getProperty("baseUrl.vj", "https://vietjetair.com");
+            case "leapfrog" -> properties.getProperty("baseUrl.lf", "");
+            default -> {
+                log.warn("Unknown test suite: {}. Defaulting to Vietjet base URL.", testSuite);
+                yield properties.getProperty("baseUrl.vj", "https://vietjetair.com");
+            }
+        };
 
         log.info("Using base URL: {}", baseUrl);
         return baseUrl;
@@ -59,7 +57,6 @@ public class LanguageHelper {
             return baseUrl + getLanguage();
         }
 
-        System.out.println(baseUrl);
         return baseUrl;
     }
 

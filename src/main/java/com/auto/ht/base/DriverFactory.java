@@ -32,16 +32,23 @@ public class DriverFactory {
             Configuration.remote = gridURL;
             DesiredCapabilities capabilities = new DesiredCapabilities();
 
-            if (browser.equalsIgnoreCase("chrome")) {
-                capabilities.setBrowserName("chrome");
-                capabilities.setCapability("enableVNC", true);
-                capabilities.setCapability("enableVideo", false);
-                Configuration.browserCapabilities = capabilities;
-            } else if (browser.equalsIgnoreCase("edge")) {
-                capabilities.setBrowserName("MicrosoftEdge");
-                capabilities.setCapability("enableVNC", true);
-                capabilities.setCapability("enableVideo", false);
-                Configuration.browserCapabilities = capabilities;
+            assert browser != null;
+            switch (browser.toLowerCase()) {
+                case "edge":
+                    capabilities.setBrowserName("MicrosoftEdge");
+                    capabilities.setCapability("enableVNC", true);
+                    capabilities.setCapability("enableVideo", false);
+                    Configuration.browserCapabilities = capabilities;
+                    break;
+                case "chrome":
+                    capabilities.setBrowserName("chrome");
+                    capabilities.setCapability("enableVNC", true);
+                    capabilities.setCapability("enableVideo", false);
+                    Configuration.browserCapabilities = capabilities;
+                    break;
+                default:
+                    log.warn("Unsupported browser: {}", browser);
+                    break;
             }
         }
     }
