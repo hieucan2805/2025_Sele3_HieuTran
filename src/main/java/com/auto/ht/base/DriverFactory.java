@@ -12,6 +12,7 @@ public class DriverFactory {
     public static void setupDriver() {
         setupDriver(false, null, null);
     }
+    private static final String PROPERTIES_FILE = "selenide.properties";
 
     public static void setupDriver(boolean gridEnabled, String browser, String gridURL) {
         PropertiesReader properties = new PropertiesReader("selenide.properties");
@@ -32,16 +33,18 @@ public class DriverFactory {
             Configuration.remote = gridURL;
             DesiredCapabilities capabilities = new DesiredCapabilities();
 
-            assert browser != null;
+            if (browser == null) {
+                throw new IllegalArgumentException("Browser must be specified either as a parameter or in the properties file.");
+            }
             switch (browser.toLowerCase()) {
                 case "edge":
-                    capabilities.setBrowserName("MicrosoftEdge");
+                    capabilities.setBrowserName("Microsoft Edge");
                     capabilities.setCapability("enableVNC", true);
                     capabilities.setCapability("enableVideo", false);
                     Configuration.browserCapabilities = capabilities;
                     break;
                 case "chrome":
-                    capabilities.setBrowserName("chrome");
+                    capabilities.setBrowserName("Google Chrome");
                     capabilities.setCapability("enableVNC", true);
                     capabilities.setCapability("enableVideo", false);
                     Configuration.browserCapabilities = capabilities;

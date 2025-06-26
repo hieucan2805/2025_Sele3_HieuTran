@@ -3,6 +3,7 @@ package com.auto.ht.utils;
 import java.time.Duration;
 
 public class Constants {
+    public static final String PROPERTIES_FILE = "selenide.properties";
 
     //Date Time Format
     public static final String TIME_FORMAT_CURRENT_DATE_TIME = "MM_dd_yyyy_HH_mm_ss";
