@@ -1,8 +1,8 @@
 package com.auto.ht.base;
 
-import com.auto.ht.utils.LanguageHelper;
+import com.auto.ht.utils.Constants;
+import com.auto.ht.utils.LazyPropertiesHelper;
 import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.PropertiesReader;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -12,20 +12,16 @@ public class DriverFactory {
     public static void setupDriver() {
         setupDriver(false, null, null);
     }
-    private static final String PROPERTIES_FILE = "selenide.properties";
+    private static final String PROPERTIES_FILE = Constants.PROPERTIES_FILE;
 
     public static void setupDriver(boolean gridEnabled, String browser, String gridURL) {
-        PropertiesReader properties = new PropertiesReader("selenide.properties");
-
-
         log.info("Load properties to Configuration ");
         // Load properties to Configuration
-        Configuration.browser = browser != null ? browser : properties.getProperty("browser", "");
-        Configuration.browserSize = properties.getProperty("browserSize", "1920x1080");
-        Configuration.timeout = Long.parseLong(properties.getProperty("timeout", "10000"));
-        Configuration.baseUrl = properties.getProperty("baseUrl.vj" + LanguageHelper.getLanguage(), "");
-        Configuration.headless = Boolean.parseBoolean(properties.getProperty("headless", "false"));
-        Configuration.pageLoadStrategy = properties.getProperty("pageLoadStrategy", "normal");
+        Configuration.browser = browser != null ? browser : LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "browser", "");
+        Configuration.browserSize = LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "browserSize", "1366x768");
+        Configuration.timeout = Long.parseLong(LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "timeout", "4000"));
+        Configuration.headless = Boolean.parseBoolean(LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "headless", "false"));
+        Configuration.pageLoadStrategy = LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "pageLoadStrategy", "normal");
 
         // Selenium Grid configuration
         if (gridEnabled && gridURL != null) {
@@ -54,5 +50,14 @@ public class DriverFactory {
                     break;
             }
         }
+
+        log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={}, headless={}, pageLoadStrategy={}, remote={}",
+                Configuration.browser,
+                Configuration.browserSize,
+                Configuration.timeout,
+                Configuration.baseUrl,
+                Configuration.headless,
+                Configuration.pageLoadStrategy,
+                Configuration.remote);
     }
 }
