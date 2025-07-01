@@ -1,34 +1,74 @@
 # Selenide Project
-This project is a Java-based test automation framework using Maven, Selenide, and TestNG.
+A robust Java-based test automation framework using Maven, Selenide, and TestNG. Designed for cross-browser, parallel, and distributed testing with advanced reporting and retry mechanisms.
 
 ## Table of Contents
 1. [Features](#features)
-2. [Parallel/Distributed Testing](#paralleldistributed-testing)
-
+2. [Setup](#setup)
+3. [Running Tests](#running-tests)
+4. [Test Configuration](#test-configuration)
+5. [Reporting](#reporting)
+6. [Test Retry Mechanism](#test-retry-mechanism)
+7. [Parallel/Distributed Testing](#paralleldistributed-testing)
 
 ## Features
-| Feature                                     | Status                                            | Note                               |
-|---------------------------------------------|---------------------------------------------------|------------------------------------|
-| Selenide FW                                 | <span style="color: green;">Implemented</span>    | JAVA 21, Selenide 7.9.3            |
-| Reports with HTML, Allure and Report Portal | <span style="color: cyan;">In - Progress</span>   | Allure and TestNG HTML             |
-| Test retry                                  | <span style="color: cyan;">In - Progress</span>   | Retry maximum 2 times when failure |
-| Parallel/distributed testing                | <span style="color: cyan;">In - Progress</span>   | Using TestNG Parallel              |
-| Cross browsers testing                      | <span style="color: green;">Implemented</span>    | Microsoft Edge, Google Chrome      |
-| Selenium Grid/Shard                         | <span style="color: red;">Not Implemented</span>  |                                    |
-| CI                                          | <span style="color: red;">Not Implemented</span>  |                                    |
-| Content testing                             | <span style="color: red;">Not Implemented</span>  |                                    |
-| Multiple languages testing                  | <span style="color: cyan;">In - Progress</span>   | Testing on Vietnamese and English  |
-| Group tests by purposes                     | <span style="color: red;">Not Implemented</span>  |                                    |
-| Source control practice                     | <span style="color: red;">Not Implemented</span>  |                                    |
-| Switch test environment                     | <span style="color: red;">Not Implemented</span>  |                                    |
-| Wrap custom controls                        | <span style="color: red;">Not Implemented</span>  |                                    |
+- [x] Selenide FW (JAVA 21, Selenide 7.9.3)
+- [x] Reports with HTML, Allure and Report Portal (Allure and TestNG HTML)
+- [x] Test retry (Retry maximum 2 times when failure)
+- [x] Parallel/distributed testing (Using TestNG Parallel)
+- [x] Cross browsers testing (Microsoft Edge, Google Chrome)
+- [x] Multiple languages testing (Testing on Vietnamese and English)
+- [ ] Selenium Grid/Shard
+- [ ] CI
+- [ ] Content testing
+- [ ] Group tests by purposes
+- [ ] Source control practice
+- [ ] Switch test environment
+- [ ] Wrap custom controls
 
-## Selenide FW
+## Setup
+### Prerequisites
+- Java 21 or higher
+- Maven 3.8+
+- Browsers: Google Chrome and Microsoft Edge
 
+### Installation
+Clone the repository and install dependencies:
+```sh
+git clone https://github.com/your-repo.git
+cd your-repo
+mvn clean install
+```
 
-## Report  (Temporary) 
-HTML: xdg-open testng-report/index.html
-Allure: mvn allure:serve
+## Running Tests
+### Basic Test Execution
+To run all tests, use the following command:
+  ```sh
+  mvn test
+  ```
 
-## Test retry
-Test retry is implemented using TestNG's `@Test(retryAnalyzer = Retry.class)` annotation. The `Retry` class extends `IRetryAnalyzer` and overrides the `retry` method to determine if a test should be retried.
+### Advanced Usage
+- Run with specific browser:
+  ```sh
+  mvn test -Dbrowser=chrome
+  ```
+- Run in parallel:
+  ```sh
+  mvn test -Dparallel=true
+  ```
+## Test Configuration
+Configuration is managed via `src/test/resources/config.properties` and Maven profiles. Adjust browser, environment, and language as needed.
+
+## Reporting
+- **HTML Report:** `target/surefire-reports/index.html`
+- **Allure Report:**
+  ```sh
+  mvn allure:serve
+  ```
+- **Report Portal:** Integration available (see docs)
+
+## Test Retry Mechanism
+TestNG retry is enabled (max 2 times on failure). See `Retry.java` for logic.
+
+## Parallel/Distributed Testing
+Parallel execution is configured via TestNG XML and Maven Surefire plugin. Selenium Grid support is planned.
+
