@@ -12,12 +12,18 @@ public class DriverFactory {
     public static void setupDriver() {
         setupDriver(false, null, null);
     }
+
+    public static void setupDriver(String browser) {
+        setupDriver(false, browser, null);
+    }
+
     private static final String PROPERTIES_FILE = Constants.PROPERTIES_FILE;
 
     public static void setupDriver(boolean gridEnabled, String browser, String gridURL) {
         log.info("Load properties to Configuration ");
         // Load properties to Configuration
-        Configuration.browser = browser != null ? browser : LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "browser", "");
+        String defaultBrowser = LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "browser", "");
+        Configuration.browser = browser != null && !browser.isEmpty() ? browser : defaultBrowser;
         Configuration.browserSize = LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "browserSize", "1366x768");
         Configuration.timeout = Long.parseLong(LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "timeout", "4000"));
         Configuration.headless = Boolean.parseBoolean(LazyPropertiesHelper.getProperty(PROPERTIES_FILE, "headless", "false"));

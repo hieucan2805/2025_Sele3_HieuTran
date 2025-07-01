@@ -33,13 +33,13 @@ public class BaseTest {
             log.info("Setting up Grid execution with browser: {}, gridURL: {}", browser, gridURL);
             DriverFactory.setupDriver(isGridEnabled, browser, gridURL);
         } else {
-            log.info("Setting up local execution");
-            DriverFactory.setupDriver();
+            log.info("Setting up local execution with browser: {}", browser);
+            DriverFactory.setupDriver(browser);
         }
 
         SelenideLogger.addListener("AllureSelenide", new AllureSelenide().screenshots(true).savePageSource(true));
         log.info("Thread ID: {} - Starting {} test method in {}",
-                Thread.currentThread().getId(),
+                Thread.currentThread().threadId(),
                 getClass().getName(),
                 Configuration.browser);
     }
@@ -47,7 +47,7 @@ public class BaseTest {
     @AfterMethod
     public void tearDown() {
         try {
-            log.info("Thread ID: {} - Finishing test method and cleaning up", Thread.currentThread().getId());
+            log.info("Thread ID: {} - Finishing test method and cleaning up", Thread.currentThread().threadId());
 
             // Only write environment data if WebDriver exists
             if (getWebDriver() != null) {

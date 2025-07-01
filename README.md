@@ -27,15 +27,16 @@ A robust Java-based test automation framework using Maven, Selenide, and TestNG.
 
 ## Setup
 ### Prerequisites
-- Java 21 or higher
-- Maven 3.8+
+- Java 21
+- Selenide 7.9.3
+- Maven 3.8.6
 - Browsers: Google Chrome and Microsoft Edge
 
 ### Installation
 Clone the repository and install dependencies:
 ```sh
-git clone https://github.com/your-repo.git
-cd your-repo
+git clone https://github.com/hieucan2805/2025_Sele3_HieuTran
+cd 2025_Sele3_HieuTran
 mvn clean install
 ```
 
@@ -53,7 +54,7 @@ To run all tests, use the following command:
   ```
 - Run in parallel:
   ```sh
-  mvn test -Dparallel=true
+  mvn test -DsuiteXmlFile=src/test/resources/suites/parallel_thread.xml -DthreadCount=2
   ```
 ## Test Configuration
 Configuration is managed via `src/test/resources/config.properties` and Maven profiles. Adjust browser, environment, and language as needed.
@@ -71,4 +72,3 @@ TestNG retry is enabled (max 2 times on failure). See `Retry.java` for logic.
 
 ## Parallel/Distributed Testing
 Parallel execution is configured via TestNG XML and Maven Surefire plugin. Selenium Grid support is planned.
-
