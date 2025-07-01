@@ -1,4 +1,4 @@
-package com.auto.ht.utils;
+package com.auto.ht.helpers;
 
 import java.util.Locale;
 import java.util.PropertyResourceBundle;

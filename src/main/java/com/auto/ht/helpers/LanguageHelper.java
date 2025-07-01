@@ -1,5 +1,6 @@
-package com.auto.ht.utils;
+package com.auto.ht.helpers;
 
+import com.auto.ht.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

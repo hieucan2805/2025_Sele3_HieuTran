@@ -1,6 +1,7 @@
 package com.auto.ht.vietjet.page;
 
-import com.auto.ht.utils.LanguageHelper;
+import com.auto.ht.utils.Constants;
+import com.auto.ht.helpers.LanguageHelper;
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 import org.slf4j.LoggerFactory;
@@ -42,4 +43,20 @@ public class BasePage {
         log.info("Close ads pop-up");
     }
 
+    // Check if element is in viewport
+    public static boolean isElementInViewport(SelenideElement element) {
+        return executeJavaScript(
+                "var rect = arguments[0].getBoundingClientRect();" +
+                        "return (" +
+                        "rect.top >= 0 && rect.left >= 0 && " +
+                        "rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && " +
+                        "rect.right <= (window.innerWidth || document.documentElement.clientWidth)" +
+                        ");", element);
+    }
+
+    public void scrollToElement(SelenideElement element) {
+        while (!isElementInViewport(element)) {
+            element.shouldBe(visible, Constants.VERY_SHORT_WAIT).scrollIntoView(true);
+        }
+    }
 }
