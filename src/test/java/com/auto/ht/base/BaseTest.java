@@ -5,6 +5,7 @@ import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import com.google.common.collect.ImmutableMap;
 import io.qameta.allure.selenide.AllureSelenide;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -25,17 +26,30 @@ public class BaseTest {
     @Parameters({"browser", "gridEnabled", "gridURL"})
     @BeforeMethod
     public void setup(@Optional String browser,
-                     @Optional("false") String gridEnabled,
-                     @Optional String gridURL) {
+                      @Optional("false") String gridEnabled,
+                      @Optional String gridURL) {
         boolean isGridEnabled = Boolean.parseBoolean(gridEnabled);
 
+        // Let Selenide handle browser configuration directly
+        if (browser != null) {
+            Configuration.browser = browser;
+        }
+
+        // Configure Selenide to use Selenium Grid if enabled
         if (isGridEnabled && gridURL != null) {
             log.info("Setting up Grid execution with browser: {}, gridURL: {}", browser, gridURL);
-            DriverFactory.setupDriver(isGridEnabled, browser, gridURL);
+            configureSeleniumGrid(browser, gridURL);
         } else {
             log.info("Setting up local execution with browser: {}", browser);
-            DriverFactory.setupDriver(browser);
         }
+        log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={}, headless={}, pageLoadStrategy={}, remote={}",
+                Configuration.browser,
+                Configuration.browserSize,
+                Configuration.timeout,
+                Configuration.baseUrl,
+                Configuration.headless,
+                Configuration.pageLoadStrategy,
+                Configuration.remote);
 
         SelenideLogger.addListener("AllureSelenide", new AllureSelenide().screenshots(true).savePageSource(true));
         log.info("Thread ID: {} - Starting {} test method in {}",
@@ -65,6 +79,41 @@ public class BaseTest {
         } finally {
             // Close the browser after each test
             Selenide.closeWebDriver();
+        }
+    }
+
+    /**
+     * Configures Selenide to run tests on Selenium Grid with browser-specific capabilities
+     *
+     * @param browser the browser to use (chrome, edge)
+     * @param gridURL the Selenium Grid URL to connect to
+     */
+    private void configureSeleniumGrid(String browser, String gridURL) {
+        Configuration.remote = gridURL;
+
+        // Set up browser-specific capabilities
+        if (browser != null) {
+            DesiredCapabilities capabilities = new DesiredCapabilities();
+
+            switch (browser.toLowerCase()) {
+                case "edge":
+                    capabilities.setBrowserName("Microsoft Edge");
+                    capabilities.setCapability("enableVNC", true);
+                    capabilities.setCapability("enableVideo", false);
+                    Configuration.browserCapabilities = capabilities;
+                    break;
+                case "chrome":
+                    capabilities.setBrowserName("Google Chrome");
+                    capabilities.setCapability("enableVNC", true);
+                    capabilities.setCapability("enableVideo", false);
+                    Configuration.browserCapabilities = capabilities;
+                    break;
+                default:
+                    log.warn("Unsupported browser: {}", browser);
+                    break;
+            }
+        } else {
+            log.warn("Browser must be specified when using grid");
         }
     }
 }
