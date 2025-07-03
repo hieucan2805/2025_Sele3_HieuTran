@@ -10,7 +10,7 @@ public class LanguageHelper {
 
 
     public static String getLanguage() {
-        return LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "language", "en");
+        return LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.language", "en");
     }
 
     public static String getTestSuite() {
@@ -20,11 +20,11 @@ public class LanguageHelper {
     public static String getBaseURL() {
         String testSuite = getTestSuite();
         String baseUrl = switch (testSuite) {
-            case "vietjet" -> LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "baseUrl.VjAir", "https://vietjetair.com");
-            case "leapfrog" -> LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "baseUrl.lf", "");
+            case "vietjet" -> LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.baseUrl.VjAir", "https://vietjetair.com");
+            case "leapfrog" -> LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.baseUrl.lf", "");
             default -> {
                 log.warn("Unknown test suite: {}. Defaulting to Vietjet base URL.", testSuite);
-                yield LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "baseUrl.VjAir", "https://vietjetair.com");
+                yield LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.baseUrl.VjAir", "https://vietjetair.com");
             }
         };
 
