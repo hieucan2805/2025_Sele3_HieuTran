@@ -11,7 +11,7 @@ public class LanguageHelper {
 
 
     public static String getLanguage() {
-        return LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "language", "en");
+        return LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.language", "en");
     }
 
     public static String getTestSuite() {
@@ -20,7 +20,8 @@ public class LanguageHelper {
 
     public static String getBaseURL() {
         String testSuite = getTestSuite();
-        String baseUrl = switch (testSuite) {
+
+        return switch (testSuite) {
             case "vietjet" -> LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "baseUrl.VjAir", "https://vietjetair.com");
             case "leapfrog" -> LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "baseUrl.lf", "");
             default -> {
@@ -28,9 +29,6 @@ public class LanguageHelper {
                 yield LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "baseUrl.VjAir", "https://vietjetair.com");
             }
         };
-
-        log.info("Using base URL: {}", baseUrl);
-        return baseUrl;
     }
 
     public static String getLocalizedURL() {
@@ -45,6 +43,7 @@ public class LanguageHelper {
             return baseUrl + getLanguage();
         }
 
+        log.info("Using base URL: {}", baseUrl);
         return baseUrl;
     }
 
