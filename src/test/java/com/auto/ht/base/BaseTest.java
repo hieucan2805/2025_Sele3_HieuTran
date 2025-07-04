@@ -42,6 +42,7 @@ public class BaseTest {
         } else {
             log.info("Setting up local execution with browser: {}", browser);
         }
+
         log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={}, headless={}, pageLoadStrategy={}, remote={}",
                 Configuration.browser,
                 Configuration.browserSize,
