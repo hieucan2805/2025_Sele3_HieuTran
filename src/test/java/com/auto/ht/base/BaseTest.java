@@ -10,40 +10,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
 
 import static com.codeborne.selenide.Selenide.getUserAgent;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static com.codeborne.selenide.WebDriverRunner.isHeadless;
-import static java.lang.invoke.MethodHandles.lookup;
 import static com.github.automatedowl.tools.AllureEnvironmentWriter.allureEnvironmentWriter;
+import static java.lang.invoke.MethodHandles.lookup;
 
 public class BaseTest {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
 
-    // Run this once per method instead of once per class to ensure each test gets a clean browser instance
-    @Parameters({"browser", "gridEnabled", "gridURL"})
     @BeforeMethod
-    public void setup(@Optional String browser,
-                      @Optional("false") String gridEnabled,
-                      @Optional String gridURL) {
-        boolean isGridEnabled = Boolean.parseBoolean(gridEnabled);
-
-        // Let Selenide handle browser configuration directly
-        if (browser != null) {
-            Configuration.browser = browser;
-        }
+    public void setup() {
+        boolean isGridEnabled = Boolean.parseBoolean(System.getProperty("selenide.gridEnabled", "false"));
+        String browser = Configuration.browser;
+        String gridURL = System.getProperty("selenide.gridURL");
 
         // Configure Selenide to use Selenium Grid if enabled
-        if (isGridEnabled && gridURL != null) {
+        if (isGridEnabled && gridURL != null && !gridURL.isEmpty()) {
             log.info("Setting up Grid execution with browser: {}, gridURL: {}", browser, gridURL);
             configureSeleniumGrid(browser, gridURL);
         } else {
             log.info("Setting up local execution with browser: {}", browser);
         }
 
-        log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={}, headless={}, pageLoadStrategy={}, remote={}",
+        log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={},  headless={}, pageLoadStrategy={}, remote={}",
                 Configuration.browser,
                 Configuration.browserSize,
                 Configuration.timeout,
@@ -58,6 +49,7 @@ public class BaseTest {
                 getClass().getName(),
                 Configuration.browser);
     }
+
 
     @AfterMethod
     public void tearDown() {
