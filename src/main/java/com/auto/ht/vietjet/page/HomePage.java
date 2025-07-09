@@ -1,5 +1,6 @@
 package com.auto.ht.vietjet.page;
 
+import com.auto.ht.components.CalendarComponent;
 import com.auto.ht.helpers.DateHelper;
 import com.auto.ht.helpers.LocatorHelper;
 import com.auto.ht.models.FlightInfoModel;
@@ -19,29 +20,18 @@ public class HomePage extends BasePage {
     @Getter
     private final LocatorHelper localeBundle = new LocatorHelper(HomePage.class.getSimpleName());
 
+    // Calendar component for reusable calendar operations
+    private final CalendarComponent calendarComponent = new CalendarComponent();
+    // Calendar component with custom locators for a specific scenario if needed
+
     private final String radioReturnFlight = "//input[@type='radio'and@value='roundTrip']";
     private final String radioOneWayFlight = "//input[@type='radio'and@value='oneway']";
-//    private final String radioReturnFlight = "//img[@src='/static/media/switch.d8860013.svg']/parent::div/preceding-sibling::div//input[@type='radio'and@value='roundTrip']";
-//    private final String radioOneWayFlight = "//img[@src='/static/media/switch.d8860013.svg']/parent::div/preceding-sibling::div//input[@type='radio'and@value='oneway']";
-    private final String typeOfFlight = "//span[text()='%s']";
     private final String inputFrom = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id)]";
     private final String buttonDepartureDate = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id='arrivalPlaceDesktop')]//ancestor::div[.//div[@role='button']]/div[@role='button']";
     private final String inputDestination = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and @id]";
     private final String buttonReturnDate = "//img[@src='/static/media/switch.d8860013.svg']/following-sibling::div/following-sibling::div//p";
     private final String optionAirportName = "//div[@id='panel1a-content']//div[text()='%s']";
-    private final String buttonDateAtCalendar = "//div[@class='rdrMonth' and contains(div,'%s')]//span[text()='%s']";
-    private final String panelCalendar = "//div[@class='rdrCalendarWrapper rdrDateRangeWrapper']";
-    private final String labelMonthInCalendar = "//div[@class='rdrMonthName']";
-    private final String buttonPrevMonth = "//button[@class='rdrNextPrevButton rdrPprevButton']";
-    private final String buttonNextMonth = "//button[@class='rdrNextPrevButton rdrNextButton']";
-    private final String labelDateInCalendar = "//div[text()='%s']//following-sibling::div[@class='rdrDays']//span[text()='%s']";
     private final String dropdownPassenger = "//input[starts-with(@id,'input-base-custom-')]";
-    private final String buttonDecreaseAdult = "//div[div[div[img[@alt='adults']]]]//button[1]";
-    private final String buttonIncreaseAdult = "//div[div[div[img[@alt='adults']]]]//button[2]";
-    private final String buttonDecreaseChild = "//div[div[div[img[@alt='children']]]]//button[1]";
-    private final String buttonIncreaseChild = "//div[div[div[img[@alt='children']]]]//button[2]";
-    private final String buttonDecreaseInfant = "//div[div[div[img[@alt='baby']]]]//button[1]";
-    private final String buttonIncreaseInfant = "//div[div[div[img[@alt='baby']]]]//button[2]";
     private final String buttonDecreasePassenger = "//div[div[div[img[@alt='%s']]]]//button[1]";
     private final String labelPassenger = "//div[div[div[img[@alt='%s']]]]//button[1]//following-sibling::span[@weight]";
     private final String buttonIncreasePassenger = "//div[div[div[img[@alt='%s']]]]//button[2]";
@@ -49,12 +39,17 @@ public class HomePage extends BasePage {
     private final String buttonSearchFlight = "//button[@tabindex='0']//span[text()]/parent::button";
 
     //Actions block
-    @Step("Select Type of Flight")
     public void clickTypeOfFlight(String typeFlight) {
-        String type_xpath = TypeFlight.fromName(typeFlight).getXPathKey();
-        String typeFlight_newXpath = localeBundle.updateLocatorWithDynamicText(typeOfFlight, type_xpath);
-
-        $x(typeFlight_newXpath).click();
+        switch (typeFlight) {
+            case "Round Trip":
+                selectOneWayFlight();
+                break;
+            case "One Way":
+                selectReturnFlight();
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid flight type: " + typeFlight);
+        }
     }
 
     @Step("Select the One Way Flight")
@@ -65,6 +60,19 @@ public class HomePage extends BasePage {
     @Step("Select the Return Flight")
     public void selectReturnFlight() {
         $x(radioReturnFlight).shouldBe(visible, Constants.VERY_SHORT_WAIT).click();
+    }
+
+
+    @Step("Select the {from} Airport and {to} Airport")
+    public void selectAirport(String from, String to) {
+        String fromPort = Airport.findByName(from);
+        String toPort = Airport.findByName(to);
+
+        inputFromLocation(fromPort);
+        clickOptionAirportName(fromPort);
+
+        inputDestinationLocation(toPort);
+        clickOptionAirportName(toPort);
     }
 
     public void inputFromLocation(String location) {
@@ -82,66 +90,25 @@ public class HomePage extends BasePage {
         $x(formatedOptionAirportName).shouldBe(visible, Constants.VERY_SHORT_WAIT).click();
     }
 
-    @Step("Select the Location")
-    public void selectAirport(String from, String to) {
-        String fromPort = Airport.findByName(from);
-        String toPort = Airport.findByName(to);
-
-        inputFromLocation(fromPort);
-        clickOptionAirportName(fromPort);
-
-        inputDestinationLocation(toPort);
-        clickOptionAirportName(toPort);
+    @Step("Select {date} in Calendar")
+    public void selectDateInCalendar(String date) {
+        calendarComponent.selectDate(date);
     }
 
     public void clickDepartureDateCalendar() {
-        $x(buttonDepartureDate).shouldBe(visible, Constants.SHORT_WAIT);
-        $x(panelCalendar).shouldBe(visible, Constants.SHORT_WAIT);
+        calendarComponent.openDepartureDateCalendar();
     }
 
     public void clickReturnDateCalendar() {
-        $x(buttonReturnDate).shouldBe(visible, Constants.SHORT_WAIT);
-        $x(buttonReturnDate).click();
-    }
-
-    @Step("Select Date in Calendar")
-    public void selectDateInCalendar(String date) {
-        // Use DateHelper to get formatted date parts for calendar
-        String[] dateParts = DateHelper.formatDateForCalendar(date);
-        String targetDate = dateParts[0];
-        String targetMonth = dateParts[1];
-
-        String dateTmpXpath = String.format(labelDateInCalendar, targetMonth, targetDate);
-
-        if (!$x(panelCalendar).shouldHave(visible, Constants.VERY_SHORT_WAIT).isDisplayed())
-            $x(buttonReturnDate).click();
-
-        gotoMonth(targetMonth);
-        $x(dateTmpXpath).click();
-    }
-
-    public void gotoMonth(String month) {
-        $x(labelMonthInCalendar).shouldBe(visible, Constants.VERY_SHORT_WAIT);
-
-        while (!($x(labelMonthInCalendar).getText().trim()).equalsIgnoreCase(month)) {
-            $x(buttonNextMonth).click();
-            $x(labelMonthInCalendar).shouldHave(visible, Constants.VERY_SHORT_WAIT);
-        }
+        calendarComponent.openReturnDateCalendar();
     }
 
     public void selectDepartureDateAndReturnDate(String deptDate, String returnDate) {
-        selectDateInCalendar(deptDate);
-        selectDateInCalendar(returnDate);
+        calendarComponent.selectDepartureAndReturnDates(deptDate, returnDate);
     }
 
     public void selectDepartureDateAndDuration(String deptDate, String duration) {
-        selectDateInCalendar(deptDate);
-
-        // Return date based on departure date + duration
-        String returnDateStr = DateHelper.addDaysToDate(deptDate, duration);
-
-        // Select the return date
-        selectDateInCalendar(returnDateStr);
+        calendarComponent.selectDepartureAndDuration(deptDate, duration);
     }
 
     @Step("Select passenger")
@@ -169,7 +136,6 @@ public class HomePage extends BasePage {
 
             $x(labelXpath).shouldNotHave(text(currentCount), Constants.VERY_SHORT_WAIT);
             currentCount = $x(labelXpath).getText();
-
         }
     }
 
