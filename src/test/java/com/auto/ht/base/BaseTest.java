@@ -1,7 +1,7 @@
 package com.auto.ht.base;
 
 import com.auto.ht.utils.Constants;
-import com.auto.ht.utils.LazyPropertiesHelper;
+import com.auto.ht.helpers.LazyPropertiesHelper;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
