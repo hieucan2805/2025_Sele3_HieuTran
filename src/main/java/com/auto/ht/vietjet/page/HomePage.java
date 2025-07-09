@@ -10,10 +10,6 @@ import com.auto.ht.vietjet.enums.TypeFlight;
 import io.qameta.allure.Step;
 import lombok.Getter;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$x;
@@ -141,7 +137,7 @@ public class HomePage extends BasePage {
     public void selectDepartureDateAndDuration(String deptDate, String duration) {
         selectDateInCalendar(deptDate);
 
-        // Use DateHelper to calculate the return date based on departure date + duration
+        // Return date based on departure date + duration
         String returnDateStr = DateHelper.addDaysToDate(deptDate, duration);
 
         // Select the return date

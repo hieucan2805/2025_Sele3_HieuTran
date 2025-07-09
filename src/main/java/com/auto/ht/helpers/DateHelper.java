@@ -117,7 +117,8 @@ public class DateHelper {
         LocalDate date = parseDate(dateString);
         String day = String.valueOf(date.getDayOfMonth());
         String month = getMonthName(date, TextStyle.FULL);
+        String year = String.valueOf(date.getYear());
 
-        return new String[] { day, month };
+        return new String[] { day, month + " " + year };
     }
 }

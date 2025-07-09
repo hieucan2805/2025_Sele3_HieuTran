@@ -8,7 +8,6 @@ import com.codeborne.selenide.Selenide;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import java.util.Objects;
 
 import static com.codeborne.selenide.Selenide.sleep;
 
@@ -21,7 +20,7 @@ public class Case001Test extends BaseTest {
         homePage.openHomePage();
 
         // Log thread ID to demonstrate parallel execution
-        log.info("TestCase001 is running in thread: " + Thread.currentThread().getId());
+        log.info("TestCase001 is running in thread: " + Thread.currentThread().getThreadGroup());
 
         sleep(5000); // Wait for the page to load
 
