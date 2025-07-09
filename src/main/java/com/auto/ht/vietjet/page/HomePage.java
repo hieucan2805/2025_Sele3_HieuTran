@@ -1,13 +1,11 @@
 package com.auto.ht.vietjet.page;
 
 import com.auto.ht.components.CalendarComponent;
-import com.auto.ht.helpers.DateHelper;
 import com.auto.ht.helpers.LocatorHelper;
 import com.auto.ht.models.FlightInfoModel;
 import com.auto.ht.models.PassengerModel;
 import com.auto.ht.utils.*;
 import com.auto.ht.vietjet.enums.Airport;
-import com.auto.ht.vietjet.enums.TypeFlight;
 import io.qameta.allure.Step;
 import lombok.Getter;
 
