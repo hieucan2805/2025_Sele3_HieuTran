@@ -1,5 +1,7 @@
 package com.auto.ht.base;
 
+import com.auto.ht.utils.Constants;
+import com.auto.ht.utils.LazyPropertiesHelper;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
@@ -22,16 +24,14 @@ public class BaseTest {
 
     @BeforeMethod
     public void setup() {
-        boolean isGridEnabled = Boolean.parseBoolean(System.getProperty("selenide.gridEnabled", "false"));
-        String browser = Configuration.browser;
-        String gridURL = System.getProperty("selenide.gridURL");
+        String gridURL = LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.gridUrl", "false");
 
-        // Configure Selenide to use Selenium Grid if enabled
-        if (isGridEnabled && gridURL != null && !gridURL.isEmpty()) {
-            log.info("Setting up Grid execution with browser: {}, gridURL: {}", browser, gridURL);
-            configureSeleniumGrid(browser, gridURL);
+        // Configure Selenide to use Selenium gridUrl is not false
+        if (gridURL != null && !gridURL.isEmpty() && !"false".equalsIgnoreCase(gridURL)) {
+            log.info("Setting up Grid execution with browser: {}, gridURL: {}", Configuration.browser, gridURL);
+            configureSeleniumGrid(Configuration.browser, gridURL);
         } else {
-            log.info("Setting up local execution with browser: {}", browser);
+            log.info("Setting up local execution with browser: {}", Configuration.browser);
         }
 
         log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={},  headless={}, pageLoadStrategy={}, remote={}",
@@ -49,7 +49,6 @@ public class BaseTest {
                 getClass().getName(),
                 Configuration.browser);
     }
-
 
     @AfterMethod
     public void tearDown() {

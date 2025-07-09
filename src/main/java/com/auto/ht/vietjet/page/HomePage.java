@@ -23,8 +23,10 @@ public class HomePage extends BasePage {
     @Getter
     private final LocatorHelper localeBundle = new LocatorHelper(HomePage.class.getSimpleName());
 
-    private final String radioReturnFlight = "//img[@src='/static/media/switch.d8860013.svg']/parent::div/preceding-sibling::div//input[@type='radio'and@value='roundTrip']";
-    private final String radioOneWayFlight = "//img[@src='/static/media/switch.d8860013.svg']/parent::div/preceding-sibling::div//input[@type='radio'and@value='oneway']";
+    private final String radioReturnFlight = "//input[@type='radio'and@value='roundTrip']";
+    private final String radioOneWayFlight = "//input[@type='radio'and@value='oneway']";
+//    private final String radioReturnFlight = "//img[@src='/static/media/switch.d8860013.svg']/parent::div/preceding-sibling::div//input[@type='radio'and@value='roundTrip']";
+//    private final String radioOneWayFlight = "//img[@src='/static/media/switch.d8860013.svg']/parent::div/preceding-sibling::div//input[@type='radio'and@value='oneway']";
     private final String typeOfFlight = "//span[text()='%s']";
     private final String inputFrom = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id)]";
     private final String buttonDepartureDate = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id='arrivalPlaceDesktop')]//ancestor::div[.//div[@role='button']]/div[@role='button']";

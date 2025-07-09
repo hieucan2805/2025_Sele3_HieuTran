@@ -14,7 +14,7 @@ public class BasePage {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(BasePage.class);
 
     private final SelenideElement buttonAcceptCookie = $x("//div[@id='popup-dialog-description']//following-sibling::div//button");
-    private final SelenideElement buttonCancelAds = $x("//button[@id='NC_CTA_TWO']");
+    private final SelenideElement buttonCancelAds = $("//button[@id='NC_CTA_TWO']");
     private final SelenideElement imgAdsInfo = $x("//alt='popup information'");
     private final SelenideElement buttonCloseAdsInfo = $x("//img[@alt='popup information']/parent::div/preceding-sibling::button");
 
