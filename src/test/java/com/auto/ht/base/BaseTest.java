@@ -24,14 +24,16 @@ public class BaseTest {
 
     @BeforeMethod
     public void setup() {
-        String gridURL = LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.gridUrl", "false");
+        String useRemote = LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.remote", "false");
+        String remoteUrl = LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.remote.url", "http://localhost:4444/wd/hub");
 
-        // Configure Selenide to use Selenium gridUrl is not false
-        if (gridURL != null && !gridURL.isEmpty() && !"false".equalsIgnoreCase(gridURL)) {
-            log.info("Setting up Grid execution with browser: {}, gridURL: {}", Configuration.browser, gridURL);
-            configureSeleniumGrid(Configuration.browser, gridURL);
+        // Configure Selenide to use Selenium Grid if remote is enabled
+        if (useRemote != null && !useRemote.isEmpty() && "true".equalsIgnoreCase(useRemote)) {
+            log.info("Setting up Grid execution with browser: {}, remoteUrl: {}", Configuration.browser, remoteUrl);
+            configureSeleniumGrid(Configuration.browser, remoteUrl);
         } else {
             log.info("Setting up local execution with browser: {}", Configuration.browser);
+            Configuration.remote = null;
         }
 
         log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={},  headless={}, pageLoadStrategy={}, remote={}",
@@ -78,10 +80,10 @@ public class BaseTest {
      * Configures Selenide to run tests on Selenium Grid with browser-specific capabilities
      *
      * @param browser the browser to use (chrome, edge)
-     * @param gridURL the Selenium Grid URL to connect to
+     * @param remoteUrl the Selenium Grid URL to connect to
      */
-    private void configureSeleniumGrid(String browser, String gridURL) {
-        Configuration.remote = gridURL;
+    private void configureSeleniumGrid(String browser, String remoteUrl) {
+        Configuration.remote = remoteUrl;
 
         // Set up browser-specific capabilities
         if (browser != null) {
