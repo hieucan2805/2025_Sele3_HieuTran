@@ -1,7 +1,5 @@
 package com.auto.ht.base;
 
-import com.auto.ht.utils.Constants;
-import com.auto.ht.utils.LazyPropertiesHelper;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
@@ -24,15 +22,16 @@ public class BaseTest {
 
     @BeforeMethod
     public void setup() {
-        String useRemote = LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.remote", "false");
-        String remoteUrl = LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.remote.url", "http://localhost:4444/wd/hub");
+        // Use Selenide's Configuration.remote directly instead of reading from properties file
+        String remoteUrl = Configuration.remote;
 
-        // Configure Selenide to use Selenium Grid if remote is enabled
-        if (useRemote != null && !useRemote.isEmpty() && "true".equalsIgnoreCase(useRemote)) {
+        // Configure Selenide to use Selenium Grid if remoteUrl is provided
+        if (remoteUrl != null && !remoteUrl.isEmpty() && !remoteUrl.equalsIgnoreCase("false")) {
             log.info("Setting up Grid execution with browser: {}, remoteUrl: {}", Configuration.browser, remoteUrl);
             configureSeleniumGrid(Configuration.browser, remoteUrl);
         } else {
             log.info("Setting up local execution with browser: {}", Configuration.browser);
+            // Important: Set remote to null for local execution
             Configuration.remote = null;
         }
 
