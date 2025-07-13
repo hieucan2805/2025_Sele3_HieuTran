@@ -5,8 +5,6 @@ import com.auto.ht.models.FlightInfoModel;
 import com.auto.ht.models.PassengerModel;
 import com.auto.ht.vietjet.page.HomePage;
 import com.auto.ht.vietjet.page.SelectFlightPage;
-import com.codeborne.selenide.Selenide;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

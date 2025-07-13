@@ -18,6 +18,6 @@ public class Case002Test extends BaseTest {
         sleep(5000); // Wait for the page to load
         
         // Adding a log message to track parallel execution
-        log.info("TestCase002 is running in thread: " + Thread.currentThread().getId());
+        log.info("TestCase002 is running in thread: " + Thread.currentThread().getThreadGroup());
     }
 }
