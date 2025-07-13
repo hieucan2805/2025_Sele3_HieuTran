@@ -29,6 +29,7 @@ public class BasePage {
         open(URL);
         log.debug("Navigate to {}", URL);
         acceptCookie();
+//        cancelAds();
     }
 
     @Step("Wait And Accept Cookie")

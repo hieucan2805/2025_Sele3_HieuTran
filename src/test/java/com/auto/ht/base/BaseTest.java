@@ -1,7 +1,5 @@
 package com.auto.ht.base;
 
-import com.auto.ht.utils.Constants;
-import com.auto.ht.helpers.LazyPropertiesHelper;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
@@ -24,14 +22,17 @@ public class BaseTest {
 
     @BeforeMethod
     public void setup() {
-        String gridURL = LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.gridUrl", "false");
+        // Use Selenide's Configuration.remote directly instead of reading from properties file
+        String remoteUrl = Configuration.remote;
 
-        // Configure Selenide to use Selenium gridUrl is not false
-        if (gridURL != null && !gridURL.isEmpty() && !"false".equalsIgnoreCase(gridURL)) {
-            log.info("Setting up Grid execution with browser: {}, gridURL: {}", Configuration.browser, gridURL);
-            configureSeleniumGrid(Configuration.browser, gridURL);
+        // Configure Selenide to use Selenium Grid if remoteUrl is provided
+        if (remoteUrl != null && !remoteUrl.isEmpty() && !remoteUrl.equalsIgnoreCase("false")) {
+            log.info("Setting up Grid execution with browser: {}, remoteUrl: {}", Configuration.browser, remoteUrl);
+            configureSeleniumGrid(Configuration.browser, remoteUrl);
         } else {
             log.info("Setting up local execution with browser: {}", Configuration.browser);
+            // Important: Set remote to null for local execution
+            Configuration.remote = null;
         }
 
         log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={},  headless={}, pageLoadStrategy={}, remote={}",
@@ -78,10 +79,10 @@ public class BaseTest {
      * Configures Selenide to run tests on Selenium Grid with browser-specific capabilities
      *
      * @param browser the browser to use (chrome, edge)
-     * @param gridURL the Selenium Grid URL to connect to
+     * @param remoteUrl the Selenium Grid URL to connect to
      */
-    private void configureSeleniumGrid(String browser, String gridURL) {
-        Configuration.remote = gridURL;
+    private void configureSeleniumGrid(String browser, String remoteUrl) {
+        Configuration.remote = remoteUrl;
 
         // Set up browser-specific capabilities
         if (browser != null) {
