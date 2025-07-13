@@ -6,6 +6,7 @@ import com.auto.ht.models.FlightInfoModel;
 import com.auto.ht.models.PassengerModel;
 import com.auto.ht.utils.*;
 import com.auto.ht.vietjet.enums.Airport;
+import com.auto.ht.vietjet.enums.TypeFlight;
 import io.qameta.allure.Step;
 import lombok.Getter;
 
@@ -22,6 +23,7 @@ public class HomePage extends BasePage {
     private final CalendarComponent calendarComponent = new CalendarComponent();
     // Calendar component with custom locators for a specific scenario if needed
 
+    private final String typeOfFlight = "//span[text()='%s']";
     private final String radioReturnFlight = "//input[@type='radio'and@value='roundTrip']";
     private final String radioOneWayFlight = "//input[@type='radio'and@value='oneway']";
     private final String inputFrom = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id)]";
@@ -37,28 +39,23 @@ public class HomePage extends BasePage {
     private final String buttonSearchFlight = "//button[@tabindex='0']//span[text()]/parent::button";
 
     //Actions block
+    @Step("Select the {typeFlight} Flight")
     public void clickTypeOfFlight(String typeFlight) {
-        switch (typeFlight) {
-            case "Round Trip":
-                selectOneWayFlight();
-                break;
-            case "One Way":
-                selectReturnFlight();
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid flight type: " + typeFlight);
-        }
+        String type_xpath = TypeFlight.fromName(typeFlight).getXPathKey();
+        String typeFlight_newXpath = localeBundle.updateLocatorWithDynamicText(typeOfFlight, type_xpath);
+
+        $x(typeFlight_newXpath).click();
     }
 
-    @Step("Select the One Way Flight")
-    public void selectOneWayFlight() {
-        $x(radioOneWayFlight).shouldBe(visible, Constants.VERY_SHORT_WAIT).click();
-    }
-
-    @Step("Select the Return Flight")
-    public void selectReturnFlight() {
-        $x(radioReturnFlight).shouldBe(visible, Constants.VERY_SHORT_WAIT).click();
-    }
+//    @Step("Select the One Way Flight")
+//    public void selectOneWayFlight() {
+//        $x(radioOneWayFlight).shouldBe(visible, Constants.SHORT_WAIT).click();
+//    }
+//
+//    @Step("Select the Return Flight")
+//    public void selectReturnFlight() {
+//        $x(radioReturnFlight).shouldBe(visible, Constants.SHORT_WAIT).click();
+//    }
 
 
     @Step("Select the {from} Airport and {to} Airport")

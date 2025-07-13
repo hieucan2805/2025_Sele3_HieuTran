@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 public class TestCase001 extends BaseTest {
 
     private final HomePage homePage = new HomePage();
-//    private final SelectFlightPage selectFightPage = new SelectFlightPage();
+    private final SelectFlightPage selectFightPage = new SelectFlightPage();
 
     @DataProvider(name = "flightSearchDataProvider")
     public Object[][] flightSearchDataProvider() {
@@ -30,9 +30,8 @@ public class TestCase001 extends BaseTest {
 
         homePage.searchFlightWithInfo(info);
 
-//        selectFightPage.cancelAds();
-//
-//        selectFightPage.chooseCheapestTicketAndContinue();
-        Selenide.sleep(5000);
+        selectFightPage.cancelAds();
+
+        selectFightPage.chooseCheapestTicketAndContinue();
     }
 }

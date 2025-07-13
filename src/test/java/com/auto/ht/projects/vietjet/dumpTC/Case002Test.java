@@ -1,4 +1,4 @@
-package com.auto.ht.projects.vietjet;
+package com.auto.ht.projects.vietjet.dumpTC;
 
 import com.auto.ht.base.BaseTest;
 import com.auto.ht.vietjet.page.HomePage;

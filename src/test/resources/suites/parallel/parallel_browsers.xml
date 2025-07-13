@@ -8,15 +8,15 @@
     <test name="Chrome Tests">
         <parameter name="browser" value="chrome"/>
         <classes>
-            <class name="com.auto.ht.projects.vietjet.Case001Test"/>
-            <class name="com.auto.ht.projects.vietjet.Case002Test"/>
+            <class name="com.auto.ht.projects.vietjet.dumpTC.Case001Test"/>
+            <class name="com.auto.ht.projects.vietjet.dumpTC.Case002Test"/>
         </classes>
     </test>
     <test name="Edge Tests">
         <parameter name="browser" value="edge"/>
         <classes>
-            <class name="com.auto.ht.projects.vietjet.Case001Test"/>
-            <class name="com.auto.ht.projects.vietjet.Case002Test"/>
+            <class name="com.auto.ht.projects.vietjet.dumpTC.Case001Test"/>
+            <class name="com.auto.ht.projects.vietjet.dumpTC.Case002Test"/>
         </classes>
     </test>
 </suite>
