@@ -14,10 +14,10 @@ import static com.codeborne.selenide.Selenide.*;
 public class BasePage {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(BasePage.class);
 
-    private final SelenideElement buttonAcceptCookie = $x("//div[@id='popup-dialog-description']//following-sibling::div//button");
-    private final SelenideElement buttonCancelAds = $("//button[@id='NC_CTA_TWO']");
-    private final SelenideElement imgAdsInfo = $x("//alt='popup information'");
-    private final SelenideElement buttonCloseAdsInfo = $x("//img[@alt='popup information']/parent::div/preceding-sibling::button");
+    private final String buttonAcceptCookie = "//div[@id='popup-dialog-description']//following-sibling::div//button";
+    private final String buttonCloseAdsInfo = "//img[@alt='popup information']/parent::div/preceding-sibling::button";
+    private final String buttonChangeLanguage = "//button//span//i";
+    private final String inputSearchLanguage = "//input[@aria-label= 'search']";
 
     protected void waitForVisible(SelenideElement element) {
         element.shouldBe(visible, Duration.ofSeconds(10));
@@ -29,18 +29,25 @@ public class BasePage {
         open(URL);
         log.debug("Navigate to {}", URL);
         acceptCookie();
-//        cancelAds();
+
     }
 
     @Step("Wait And Accept Cookie")
     public void acceptCookie() {
-        buttonAcceptCookie.shouldBe(visible, Duration.ofSeconds(5)).click();
+        $x(buttonAcceptCookie).shouldBe(visible, Constants.SHORT_WAIT).click();
     }
 
     @Step("Wait And Cancel Ads")
     public void cancelAds() {
-        buttonCloseAdsInfo.shouldBe(visible, Duration.ofSeconds(5)).click();
+        $x(buttonCloseAdsInfo).shouldBe(visible, Constants.SHORT_WAIT).click();
         log.info("Close ads pop-up");
+    }
+
+    public void changeLanguage(String language) {
+        $x(buttonChangeLanguage).shouldBe(visible, Constants.SHORT_WAIT).click();
+        $x(inputSearchLanguage).shouldBe(visible, Constants.SHORT_WAIT).setValue(language);
+        $x("//span[text()='" + language + "']").shouldBe(visible, Constants.SHORT_WAIT).click();
+        log.info("Change language to {}", language);
     }
 
     // Check if element is in viewport
