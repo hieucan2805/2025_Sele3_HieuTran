@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class FlightInfoModel {
+public class BookingInformationModel {
 
     private String type;
     private String from;

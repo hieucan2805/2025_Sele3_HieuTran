@@ -2,7 +2,7 @@ package com.auto.ht.vietjet.page;
 
 import com.auto.ht.components.CalendarComponent;
 import com.auto.ht.helpers.LocatorHelper;
-import com.auto.ht.models.FlightInfoModel;
+import com.auto.ht.models.BookingInformationModel;
 import com.auto.ht.models.PassengerModel;
 import com.auto.ht.utils.*;
 import com.auto.ht.vietjet.enums.Airport;
@@ -144,23 +144,23 @@ public class HomePage extends BasePage {
     }
 
     @Step("Fill information to search")
-    public void fillFlightInfo(FlightInfoModel flightInfoModel) {
-        clickTypeOfFlight(flightInfoModel.getType());
+    public void fillFlightInfo(BookingInformationModel bookingInformationModel) {
+        clickTypeOfFlight(bookingInformationModel.getType());
 
-        selectAirport(flightInfoModel.getFrom(), flightInfoModel.getTo());
-        if (flightInfoModel.getDuration().isEmpty()) {
-            selectDateInCalendar(flightInfoModel.getDepartureDate());
+        selectAirport(bookingInformationModel.getFrom(), bookingInformationModel.getTo());
+        if (bookingInformationModel.getDuration().isEmpty()) {
+            selectDateInCalendar(bookingInformationModel.getDepartureDate());
         } else {
-            selectDepartureDateAndDuration(flightInfoModel.getDepartureDate(), flightInfoModel.getDuration());
+            selectDepartureDateAndDuration(bookingInformationModel.getDepartureDate(), bookingInformationModel.getDuration());
         }
 
-        inputPassenger(flightInfoModel.getPassenger());
+        inputPassenger(bookingInformationModel.getPassenger());
         collapsePassengerPanel();
     }
 
     @Step("Search Flight with information")
-    public void searchFlightWithInfo(FlightInfoModel flightInfoModel) {
-        fillFlightInfo(flightInfoModel);
+    public void searchFlightWithInfo(BookingInformationModel bookingInformationModel) {
+        fillFlightInfo(bookingInformationModel);
 
         clickSearch();
     }

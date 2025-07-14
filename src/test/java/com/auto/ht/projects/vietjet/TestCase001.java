@@ -1,7 +1,7 @@
 package com.auto.ht.projects.vietjet;
 
 import com.auto.ht.base.BaseTest;
-import com.auto.ht.models.FlightInfoModel;
+import com.auto.ht.models.BookingInformationModel;
 import com.auto.ht.models.PassengerModel;
 import com.auto.ht.vietjet.page.HomePage;
 import com.auto.ht.vietjet.page.SelectFlightPage;
@@ -16,14 +16,14 @@ public class TestCase001 extends BaseTest {
     @DataProvider(name = "flightSearchDataProvider")
     public Object[][] flightSearchDataProvider() {
         return new Object[][]{
-                {new FlightInfoModel("Round Trip",
+                {new BookingInformationModel("Round Trip",
                         "Thành phố Hồ Chí Minh", "Hà Nội", "tomorrow", "3",
                         new PassengerModel("2", "0", "0"))}
         };
     }
 
     @Test(dataProvider = "flightSearchDataProvider")
-    public void vietJetTest(FlightInfoModel info) {
+    public void vietJetTest(BookingInformationModel info) {
         homePage.openHomePage();
 
         homePage.searchFlightWithInfo(info);

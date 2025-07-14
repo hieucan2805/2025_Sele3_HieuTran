@@ -6,6 +6,7 @@ import com.auto.ht.utils.Constants;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import static com.codeborne.selenide.Selenide.$$x;
 import static com.codeborne.selenide.Selenide.$x;
 
 public class SelectFlightPage extends BasePage {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(SelectFlightPage.class);
     private final String language = LanguageHelper.getLanguage();
 
     @Getter
@@ -134,7 +136,7 @@ public class SelectFlightPage extends BasePage {
 
         if (cheapestElement != null) {
             cheapestElement.click();
-            System.out.println("Clicked on the lowest price: " + minPrice);
+            log.info("Clicked on the lowest price: " + minPrice);
         } else {
             throw new IllegalStateException("No valid prices found to click.");
         }
