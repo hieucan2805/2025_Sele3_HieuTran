@@ -2,9 +2,11 @@ package com.auto.ht.vietjet.page;
 
 import com.auto.ht.helpers.LanguageHelper;
 import com.auto.ht.helpers.LocatorHelper;
+import com.auto.ht.helpers.iFrameHelper;
 import com.auto.ht.utils.Constants;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import io.qameta.allure.Step;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
@@ -12,8 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selenide.$$x;
-import static com.codeborne.selenide.Selenide.$x;
+import static com.codeborne.selenide.Selenide.*;
 
 public class SelectFlightPage extends BasePage {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(SelectFlightPage.class);
@@ -56,6 +57,76 @@ public class SelectFlightPage extends BasePage {
                 .map(price -> price.replaceAll("[^\\d]", "")) // Remove non-numeric chars
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
+    }
+
+    public void scrollToBottomPage() {
+        scrollToElement($x(labelVJAAtTheBottomPage));
+    }
+
+    public void selectLowestPriceTicket() {
+        try {
+            // First try to close any notification frames or overlays
+            iFrameHelper.handleInterceptingFrames();
+
+            ElementsCollection priceElements = getAllElementsCollectionFlightPrices();
+            int minPrice = Integer.MAX_VALUE;
+            SelenideElement cheapestElement = null;
+
+            for (SelenideElement priceElement : priceElements) {
+                priceElement.scrollIntoView(true).shouldBe(visible);
+                String priceText = priceElement.getText().replaceAll("[^\\d]", "");
+                if (!priceText.isEmpty()) {
+                    int price = Integer.parseInt(priceText);
+                    if (price < minPrice) {
+                        minPrice = price;
+                        cheapestElement = priceElement;
+                    }
+                }
+            }
+
+            if (cheapestElement != null) {
+                iFrameHelper.safeClick(cheapestElement);
+                log.info("Clicked on the lowest price: {}", minPrice);
+            } else {
+                throw new IllegalStateException("No valid prices found to click.");
+            }
+        } catch (Exception e) {
+            log.error("Failed to select lowest price ticket: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Step("Select the cheapest ticket for departure flight")
+    public void selectCheapestTicketForDepartureFlight() {
+        selectLowestPriceTicket();
+    }
+
+    @Step("Select the cheapest ticket for return flight")
+    public void selectCheapestTicketForReturnFlight() {
+        selectLowestPriceTicket();
+    }
+
+    public String getDepartureFlightPrice() {
+        String newXpath = localeBundle.updateLocatorWithDynamicText(labelFlightPrice, "text.DepartureFlight");
+        return $x(newXpath).shouldBe(visible, Constants.SHORT_WAIT).getText();
+    }
+
+    public String getReturnFlightPrice() {
+        String newXpath = localeBundle.updateLocatorWithDynamicText(labelFlightPrice, "text.ReturnFlight");
+        return $x(newXpath).shouldBe(visible, Constants.SHORT_WAIT).getText();
+    }
+
+    public void clickContinueButton() {
+        String newXpath = localeBundle.updateLocatorWithDynamicText(buttonContinue, "button.Continue");
+        $x(newXpath).shouldBe(visible, Constants.SHORT_WAIT).click();
+    }
+
+    public void chooseCheapestTicketAndContinue() {
+        selectCheapestTicketForDepartureFlight();
+
+        clickContinueButton();
+
+        selectCheapestTicketForReturnFlight();
     }
 
     /**
@@ -112,67 +183,5 @@ public class SelectFlightPage extends BasePage {
                 .orElseThrow(() -> new IllegalStateException("No prices found"));
     }
 
-
-    public void scrollToBottomPage() {
-        scrollToElement($x(labelVJAAtTheBottomPage));
-    }
-
-    public void selectLowestPriceTicket() {
-        ElementsCollection priceElements = getAllElementsCollectionFlightPrices();
-        int minPrice = Integer.MAX_VALUE;
-        SelenideElement cheapestElement = null;
-
-        for (SelenideElement priceElement : priceElements) {
-            priceElement.scrollIntoView(true).shouldBe(com.codeborne.selenide.Condition.visible);
-            String priceText = priceElement.getText().replaceAll("[^\\d]", "");
-            if (!priceText.isEmpty()) {
-                int price = Integer.parseInt(priceText);
-                if (price < minPrice) {
-                    minPrice = price;
-                    cheapestElement = priceElement;
-                }
-            }
-        }
-
-        if (cheapestElement != null) {
-            cheapestElement.click();
-            log.info("Clicked on the lowest price: " + minPrice);
-        } else {
-            throw new IllegalStateException("No valid prices found to click.");
-        }
-    }
-
-    public void selectCheapestTicketForDepartureFlight(){
-        selectLowestPriceTicket();
-    }
-
-    public void selectCheapestTicketForReturnFlight(){
-        selectLowestPriceTicket();
-    }
-
-    public String getDepartureFlightPrice(){
-        String newXpath = localeBundle.updateLocatorWithDynamicText(labelFlightPrice, "text.DepartureFlight");
-        return $x(newXpath).shouldBe(visible,Constants.SHORT_WAIT).getText();
-    }
-
-    public String getReturnFlightPrice(){
-        String newXpath = localeBundle.updateLocatorWithDynamicText(labelFlightPrice, "text.ReturnFlight");
-        return $x(newXpath).shouldBe(visible,Constants.SHORT_WAIT).getText();
-    }
-
-    public void clickContinueButton(){
-        String newXpath = localeBundle.updateLocatorWithDynamicText(buttonContinue, "button.Continue");
-        $x(newXpath).shouldBe(visible, Constants.SHORT_WAIT).click();
-    }
-
-    public void chooseCheapestTicketAndContinue(){
-        selectCheapestTicketForDepartureFlight();
-        System.out.println(getDepartureFlightPrice());
-
-        clickContinueButton();
-
-        selectCheapestTicketForReturnFlight();
-        System.out.println(getReturnFlightPrice());
-    }
 
 }

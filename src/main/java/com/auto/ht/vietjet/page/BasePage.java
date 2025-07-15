@@ -1,7 +1,9 @@
 package com.auto.ht.vietjet.page;
 
 import com.auto.ht.helpers.LanguageHelper;
+import com.auto.ht.helpers.iFrameHelper;
 import com.auto.ht.utils.Constants;
+import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 import org.slf4j.LoggerFactory;
@@ -13,10 +15,11 @@ import static com.codeborne.selenide.Selenide.*;
 
 public class BasePage {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(BasePage.class);
+    private final String language = LanguageHelper.getLanguage();
 
     private final String buttonAcceptCookie = "//div[@id='popup-dialog-description']//following-sibling::div//button";
     private final String buttonCloseAdsInfo = "//img[@alt='popup information']/parent::div/preceding-sibling::button";
-    private final String buttonChangeLanguage = "//button//span//i";
+    private final String labelChangeLanguage = "//button//span//div";
     private final String inputSearchLanguage = "//input[@aria-label= 'search']";
 
     protected void waitForVisible(SelenideElement element) {
@@ -25,11 +28,11 @@ public class BasePage {
 
     @Step("Navigate to Homepage")
     public void openHomePage() {
-        String URL = LanguageHelper.getLocalizedURL();
-        open(URL);
-        log.debug("Navigate to {}", URL);
+        open(Configuration.baseUrl);
+        log.debug("Navigate to {}", Configuration.baseUrl);
         acceptCookie();
 
+        changeLanguage(language);
     }
 
     @Step("Wait And Accept Cookie")
@@ -43,11 +46,14 @@ public class BasePage {
         log.info("Close ads pop-up");
     }
 
+    @Step("Change Language to {language}")
     public void changeLanguage(String language) {
-        $x(buttonChangeLanguage).shouldBe(visible, Constants.SHORT_WAIT).click();
-        $x(inputSearchLanguage).shouldBe(visible, Constants.SHORT_WAIT).setValue(language);
-        $x("//span[text()='" + language + "']").shouldBe(visible, Constants.SHORT_WAIT).click();
-        log.info("Change language to {}", language);
+        if (!$x(labelChangeLanguage).shouldBe(visible).getText().toLowerCase().equals(language.toLowerCase())) {
+            $x(labelChangeLanguage).shouldBe(visible, Constants.SHORT_WAIT).click();
+            $x(inputSearchLanguage).shouldBe(visible, Constants.SHORT_WAIT).setValue(language);
+            $x("//span[text()='" + language + "']").shouldBe(visible, Constants.SHORT_WAIT).click();
+            log.info("Change language to {}", language);
+        }
     }
 
     // Check if element is in viewport

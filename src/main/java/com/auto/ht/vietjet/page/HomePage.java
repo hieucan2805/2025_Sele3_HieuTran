@@ -15,7 +15,6 @@ import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$x;
 
 public class HomePage extends BasePage {
-
     @Getter
     private final LocatorHelper localeBundle = new LocatorHelper(HomePage.class.getSimpleName());
 
@@ -24,8 +23,6 @@ public class HomePage extends BasePage {
     // Calendar component with custom locators for a specific scenario if needed
 
     private final String typeOfFlight = "//span[text()='%s']";
-    private final String radioReturnFlight = "//input[@type='radio'and@value='roundTrip']";
-    private final String radioOneWayFlight = "//input[@type='radio'and@value='oneway']";
     private final String inputFrom = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id)]";
     private final String buttonDepartureDate = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id='arrivalPlaceDesktop')]//ancestor::div[.//div[@role='button']]/div[@role='button']";
     private final String inputDestination = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and @id]";
@@ -47,27 +44,16 @@ public class HomePage extends BasePage {
         $x(typeFlight_newXpath).click();
     }
 
-//    @Step("Select the One Way Flight")
-//    public void selectOneWayFlight() {
-//        $x(radioOneWayFlight).shouldBe(visible, Constants.SHORT_WAIT).click();
-//    }
-//
-//    @Step("Select the Return Flight")
-//    public void selectReturnFlight() {
-//        $x(radioReturnFlight).shouldBe(visible, Constants.SHORT_WAIT).click();
-//    }
-
-
     @Step("Select the {from} Airport and {to} Airport")
     public void selectAirport(String from, String to) {
-        String fromPort = Airport.findByName(from);
-        String toPort = Airport.findByName(to);
+//        String fromPort = Airport.findByName(from);
+//        String toPort = Airport.findByName(to);
 
-        inputFromLocation(fromPort);
-        clickOptionAirportName(fromPort);
+        inputFromLocation(from);
+        clickOptionAirportName(from);
 
-        inputDestinationLocation(toPort);
-        clickOptionAirportName(toPort);
+        inputDestinationLocation(to);
+        clickOptionAirportName(to);
     }
 
     public void inputFromLocation(String location) {

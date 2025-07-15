@@ -7,19 +7,16 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Airport {
 
-    SGN("SGN", "Thành phố Hồ Chí Minh", "Ho Chi Minh city", "Tân Sơn Nhất"),
-    HAN("HAN", "Hà Nội", "Hanoi", "Nội Bài"),
-    DAD("DAD", "Đà Nẵng", "Danang", "Danang Airport");
+    SGN("SGN"),
+    HAN("HAN"),
+    DAD("DAD");
 
     private final String code;
-    private final String vietnameseName;
-    private final String englishName;
-    private final String airportName;
+
 
     /**
      * Get Airport enum by IATA code.
      * @param code IATA code (e.g., SGN, HAN, DAD)
-     * @return Airport enum if found; otherwise throws IllegalArgumentException
      * @return Airport enum if found; otherwise throws IllegalArgumentException
      */
     public static Airport fromCode(String code) {
@@ -46,6 +43,20 @@ public enum Airport {
             }
         }
         throw new IllegalArgumentException("No airport code found for name: " + name);
+    }
+
+    /**
+     * Get the airport name based on the IATA code.
+     * @param code IATA code (e.g., SGN, HAN, DAD)
+     * @return The airport name if found; otherwise throws IllegalArgumentException
+     */
+    public static String getAirportNameByCode(String code) {
+        for (Airport airport : Airport.values()) {
+            if (airport.getCode().equalsIgnoreCase(code)) {
+                return airport.getAirportName();
+            }
+        }
+        throw new IllegalArgumentException("No airport found with code: " + code);
     }
 
     @Override
