@@ -18,7 +18,7 @@ public class PassengerInfoPage extends BasePage{
 
     private final Supplier<SelenideElement> frmPassengerInfoForm = () -> $x("//i[@class = 'fa fa-male']/ancestor::div[contains(@style,'padding-bottom')]");
     private final String labelFrom = "//img[@src='/static/media/departure-icon.25d3557e.svg']//following-sibling::p";
-    private final String labelTo = "//img[@src='/static/media/arrival-icon.a05c5d78.svg']//following-sibling::p";
+    private final String labelDestination = "//img[@src='/static/media/arrival-icon.a05c5d78.svg']//following-sibling::p";
     private final String labelTypeAndPassenger = "//img[@src='/static/media/departure-icon.25d3557e.svg']//parent::div//preceding-sibling::p";
 
 
@@ -32,6 +32,16 @@ public class PassengerInfoPage extends BasePage{
         return ($x(airportName).getText().split("\\(")[1].trim()).split("\\)")[0].trim();
     }
 
+    public boolean verifyFromAirport(String airportName) {
+        String fromAirport = $x(labelFrom).shouldBe(visible, Constants.SHORT_WAIT).getText();
+        return fromAirport.contains(getAirportCode(airportName));
+    }
+
+    public boolean verifyDestinationAirport(String airportName) {
+        String toAirport = $x(labelDestination).shouldBe(visible, Constants.SHORT_WAIT).getText();
+        return toAirport.contains(getAirportCode(airportName));
+    }
+
     public String getTypeOfFlightText(){
         String tmp_text=  $x(labelTypeAndPassenger).shouldBe(visible, Constants.SHORT_WAIT).getText();
         return tmp_text.split("\\|")[0].trim();
@@ -43,15 +53,7 @@ public class PassengerInfoPage extends BasePage{
     }
 
     public boolean verifyTicketInfo(BookingInformationModel ticketInfo) {
-//        String fromAirportCode = getAirportCode(Airport.findByName(ticketInfo.getFrom()).getName());
-//        String toAirportCode = getAirportCode(Airport.findByName(ticketInfo.getTo()).getName());
-//
-//        return $x(labelFrom).shouldBe(visible, Constants.SHORT_WAIT)
-//                .getText().contains(fromAirportCode) &&
-//               $x(labelTo).shouldBe(visible, Constants.SHORT_WAIT)
-//                .getText().contains(toAirportCode) &&
-//               getTypeOfFlightText().equalsIgnoreCase(ticketInfo.getTypeOfFlight()) &&
-//               getPassengerText().equalsIgnoreCase(ticketInfo.getPassenger());
-        return false;
+        return verifyFromAirport(ticketInfo.getFrom()) &&
+                verifyDestinationAirport(ticketInfo.getTo());
     }
 }
