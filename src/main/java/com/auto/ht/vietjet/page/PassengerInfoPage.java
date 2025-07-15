@@ -3,13 +3,10 @@ package com.auto.ht.vietjet.page;
 import com.auto.ht.helpers.LocatorHelper;
 import com.auto.ht.models.BookingInformationModel;
 import com.auto.ht.utils.Constants;
-import com.auto.ht.vietjet.enums.Airport;
-import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 import lombok.Getter;
 
-import java.time.Duration;
 import java.util.function.Supplier;
 
 import static com.codeborne.selenide.Condition.visible;

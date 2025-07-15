@@ -1,14 +1,11 @@
 package com.auto.ht.vietjet.page;
 
 import com.auto.ht.helpers.LanguageHelper;
-import com.auto.ht.helpers.iFrameHelper;
 import com.auto.ht.utils.Constants;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 import org.slf4j.LoggerFactory;
-
-import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
@@ -21,10 +18,6 @@ public class BasePage {
     private final String buttonCloseAdsInfo = "//img[@alt='popup information']/parent::div/preceding-sibling::button";
     private final String labelChangeLanguage = "//button//span//div";
     private final String inputSearchLanguage = "//input[@aria-label= 'search']";
-
-    protected void waitForVisible(SelenideElement element) {
-        element.shouldBe(visible, Duration.ofSeconds(10));
-    }
 
     @Step("Navigate to Homepage")
     public void openHomePage() {
@@ -48,7 +41,7 @@ public class BasePage {
 
     @Step("Change Language to {language}")
     public void changeLanguage(String language) {
-        if (!$x(labelChangeLanguage).shouldBe(visible).getText().toLowerCase().equals(language.toLowerCase())) {
+        if (!$x(labelChangeLanguage).shouldBe(visible).getText().equalsIgnoreCase(language)) {
             $x(labelChangeLanguage).shouldBe(visible, Constants.SHORT_WAIT).click();
             $x(inputSearchLanguage).shouldBe(visible, Constants.SHORT_WAIT).setValue(language);
             $x("//span[text()='" + language + "']").shouldBe(visible, Constants.SHORT_WAIT).click();
@@ -58,14 +51,18 @@ public class BasePage {
 
     // Check if element is in viewport
     public static boolean isElementInViewport(SelenideElement element) {
-        return executeJavaScript(
-                "var rect = arguments[0].getBoundingClientRect();" +
+        Boolean visible = executeJavaScript(
+                "var rect = arguments[0]?.getBoundingClientRect();" +
+                        "if (!rect) return null;" +
                         "return (" +
                         "rect.top >= 0 && rect.left >= 0 && " +
                         "rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && " +
                         "rect.right <= (window.innerWidth || document.documentElement.clientWidth)" +
                         ");", element);
+
+        return Boolean.TRUE.equals(visible); // an toàn nếu visible là null
     }
+
 
     public void scrollToElement(SelenideElement element) {
         while (!isElementInViewport(element)) {

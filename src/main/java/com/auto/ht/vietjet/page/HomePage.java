@@ -5,7 +5,6 @@ import com.auto.ht.helpers.LocatorHelper;
 import com.auto.ht.models.BookingInformationModel;
 import com.auto.ht.models.PassengerModel;
 import com.auto.ht.utils.*;
-import com.auto.ht.vietjet.enums.Airport;
 import com.auto.ht.vietjet.enums.TypeFlight;
 import io.qameta.allure.Step;
 import lombok.Getter;
