@@ -9,6 +9,7 @@ import com.auto.ht.vietjet.page.SelectFlightPage;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 public class TestCase001 extends BaseTest {
 
@@ -19,7 +20,7 @@ public class TestCase001 extends BaseTest {
     @DataProvider(name = "flightSearchDataProvider")
     public Object[][] flightSearchDataProvider() {
         return new Object[][]{
-                {new BookingInformationModel("Round Trip",
+                {new BookingInformationModel("Return",
                         "SGN", "HAN", "tomorrow", "3",
                         new PassengerModel("2", "0", "0"))}
         };
@@ -38,5 +39,7 @@ public class TestCase001 extends BaseTest {
         //Verify the Passenger Info Form is displayed
         Assert.assertTrue(passengerInfoPage.verifyPassengerInfoFormIsDisplayed());
 
+        //Verify Ticket Information
+        Assert.assertTrue(passengerInfoPage.verifyTicketInfo(info));
     }
 }

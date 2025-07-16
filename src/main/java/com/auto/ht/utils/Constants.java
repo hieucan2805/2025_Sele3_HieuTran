@@ -15,7 +15,7 @@ public class Constants {
     public static final String TIME_FORMAT_CURRENT_DATE = "dd, MMMM yyyy";
 
     //Time out
-    public static final Duration MEDIUM_WAIT = Duration.ofSeconds(5);
+    public static final Duration MEDIUM_WAIT = Duration.ofSeconds(10);
     public static final Duration SHORT_WAIT = Duration.ofSeconds(5);
     public static final Duration VERY_SHORT_WAIT = Duration.ofSeconds(1);
 }

@@ -123,10 +123,10 @@ public class SelectFlightPage extends BasePage {
 
     public void chooseCheapestTicketAndContinue() {
         selectCheapestTicketForDepartureFlight();
-
         clickContinueButton();
 
         selectCheapestTicketForReturnFlight();
+        clickContinueButton();
     }
 
     /**

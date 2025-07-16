@@ -8,6 +8,7 @@ import com.auto.ht.utils.*;
 import com.auto.ht.vietjet.enums.TypeFlight;
 import io.qameta.allure.Step;
 import lombok.Getter;
+import org.slf4j.LoggerFactory;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
@@ -16,6 +17,7 @@ import static com.codeborne.selenide.Selenide.$x;
 public class HomePage extends BasePage {
     @Getter
     private final LocatorHelper localeBundle = new LocatorHelper(HomePage.class.getSimpleName());
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(HomePage.class);
 
     // Calendar component for reusable calendar operations
     private final CalendarComponent calendarComponent = new CalendarComponent();
@@ -37,10 +39,11 @@ public class HomePage extends BasePage {
     //Actions block
     @Step("Select the {typeFlight} Flight")
     public void clickTypeOfFlight(String typeFlight) {
-        String type_xpath = TypeFlight.fromName(typeFlight).getXPathKey();
-        String typeFlight_newXpath = localeBundle.updateLocatorWithDynamicText(typeOfFlight, type_xpath);
+//        String type_xpath = TypeFlight.fromName(typeFlight).getXPathKey();
+//        String typeFlight_newXpath = localeBundle.updateLocatorWithDynamicText(typeOfFlight, type_xpath);
+        String type_xpath = String.format(typeOfFlight, typeFlight);
 
-        $x(typeFlight_newXpath).click();
+        $x(type_xpath).click();
     }
 
     @Step("Select the {from} Airport and {to} Airport")
