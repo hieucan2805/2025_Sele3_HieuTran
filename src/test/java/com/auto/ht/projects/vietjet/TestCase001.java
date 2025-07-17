@@ -1,15 +1,12 @@
 package com.auto.ht.projects.vietjet;
 
 import com.auto.ht.base.BaseTest;
-import com.auto.ht.models.BookingInformationModel;
-import com.auto.ht.models.PassengerModel;
-import com.auto.ht.vietjet.page.HomePage;
-import com.auto.ht.vietjet.page.PassengerInfoPage;
-import com.auto.ht.vietjet.page.SelectFlightPage;
+import com.auto.ht.projects.vietjet.models.BookingInformationModel;
+import com.auto.ht.projects.vietjet.page.HomePage;
+import com.auto.ht.projects.vietjet.page.PassengerInfoPage;
+import com.auto.ht.projects.vietjet.page.SelectFlightPage;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import org.testng.asserts.SoftAssert;
 
 public class TestCase001 extends BaseTest {
 
@@ -17,16 +14,7 @@ public class TestCase001 extends BaseTest {
     private final SelectFlightPage selectFightPage = new SelectFlightPage();
     private final PassengerInfoPage passengerInfoPage = new PassengerInfoPage();
 
-    @DataProvider(name = "flightSearchDataProvider")
-    public Object[][] flightSearchDataProvider() {
-        return new Object[][]{
-                {new BookingInformationModel("Return",
-                        "SGN", "HAN", "tomorrow", "3",
-                        new PassengerModel("2", "0", "0"))}
-        };
-    }
-
-    @Test(dataProvider = "flightSearchDataProvider")
+    @Test(dataProvider = "flightSearchDataProvider", dataProviderClass = com.auto.ht.projects.vietjet.dataprovider.TestCase001Provider.class)
     public void vietJetTest(BookingInformationModel info) {
         homePage.openHomePage();
 

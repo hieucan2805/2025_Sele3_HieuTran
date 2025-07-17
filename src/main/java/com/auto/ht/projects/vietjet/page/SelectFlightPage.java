@@ -1,4 +1,4 @@
-package com.auto.ht.vietjet.page;
+package com.auto.ht.projects.vietjet.page;
 
 import com.auto.ht.helpers.LanguageHelper;
 import com.auto.ht.helpers.LocatorHelper;
@@ -125,6 +125,7 @@ public class SelectFlightPage extends BasePage {
         selectCheapestTicketForDepartureFlight();
         clickContinueButton();
 
+        //TODO: Add a wait for the return flight section to be visible
         selectCheapestTicketForReturnFlight();
         clickContinueButton();
     }

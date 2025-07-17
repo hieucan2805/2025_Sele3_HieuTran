@@ -1,4 +1,4 @@
-package com.auto.ht.models;
+package com.auto.ht.projects.vietjet.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +12,12 @@ public class PassengerModel {
     private String child;
     private String baby;
 
+    public PassengerModel() {
+        this.adults = "0";
+        this.child = "0";
+        this.baby = "0";
+    }
+
     public PassengerModel(String passengerInfo) {
         String[] parts = passengerInfo.split(",");
         this.adults = parts[0].trim();
@@ -21,5 +27,6 @@ public class PassengerModel {
 
     @Override
     public String toString() {
-        return "Passenger{adults=" + adults + ", child=" + child + ", baby=" + baby + "}";    }
+        return "Passenger{adults=" + adults + ", child=" + child + ", baby=" + baby + "}";
+    }
 }

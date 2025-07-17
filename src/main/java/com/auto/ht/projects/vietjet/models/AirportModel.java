@@ -1,4 +1,4 @@
-package com.auto.ht.models;
+package com.auto.ht.projects.vietjet.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

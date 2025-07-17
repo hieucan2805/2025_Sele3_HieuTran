@@ -1,11 +1,10 @@
-package com.auto.ht.vietjet.page;
+package com.auto.ht.projects.vietjet.page;
 
 import com.auto.ht.components.CalendarComponent;
 import com.auto.ht.helpers.LocatorHelper;
-import com.auto.ht.models.BookingInformationModel;
-import com.auto.ht.models.PassengerModel;
+import com.auto.ht.projects.vietjet.models.BookingInformationModel;
+import com.auto.ht.projects.vietjet.models.PassengerModel;
 import com.auto.ht.utils.*;
-import com.auto.ht.vietjet.enums.TypeFlight;
 import io.qameta.allure.Step;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
@@ -18,10 +17,7 @@ public class HomePage extends BasePage {
     @Getter
     private final LocatorHelper localeBundle = new LocatorHelper(HomePage.class.getSimpleName());
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(HomePage.class);
-
-    // Calendar component for reusable calendar operations
     private final CalendarComponent calendarComponent = new CalendarComponent();
-    // Calendar component with custom locators for a specific scenario if needed
 
     private final String typeOfFlight = "//span[text()='%s']";
     private final String inputFrom = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id)]";
@@ -39,18 +35,17 @@ public class HomePage extends BasePage {
     //Actions block
     @Step("Select the {typeFlight} Flight")
     public void clickTypeOfFlight(String typeFlight) {
-//        String type_xpath = TypeFlight.fromName(typeFlight).getXPathKey();
-//        String typeFlight_newXpath = localeBundle.updateLocatorWithDynamicText(typeOfFlight, type_xpath);
-        String type_xpath = String.format(typeOfFlight, typeFlight);
-
-        $x(type_xpath).click();
+        String newXpath;
+        if (typeFlight.equalsIgnoreCase("oneway")) {
+            newXpath = localeBundle.updateLocatorWithDynamicText(typeOfFlight, "radio.oneWay");
+        } else {
+            newXpath = localeBundle.updateLocatorWithDynamicText(typeOfFlight, "radio.roundTrip");
+        }
+        $x(newXpath).click();
     }
 
     @Step("Select the {from} Airport and {to} Airport")
     public void selectAirport(String from, String to) {
-//        String fromPort = Airport.findByName(from);
-//        String toPort = Airport.findByName(to);
-
         inputFromLocation(from);
         clickOptionAirportName(from);
 
@@ -136,7 +131,7 @@ public class HomePage extends BasePage {
         clickTypeOfFlight(bookingInformationModel.getType());
 
         selectAirport(bookingInformationModel.getFrom(), bookingInformationModel.getTo());
-        if (bookingInformationModel.getDuration().isEmpty()) {
+        if (bookingInformationModel.getDuration().isEmpty() || bookingInformationModel.getType().equalsIgnoreCase("oneway")) {
             selectDateInCalendar(bookingInformationModel.getDepartureDate());
         } else {
             selectDepartureDateAndDuration(bookingInformationModel.getDepartureDate(), bookingInformationModel.getDuration());

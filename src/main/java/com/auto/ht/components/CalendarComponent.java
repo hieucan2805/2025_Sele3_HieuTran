@@ -9,7 +9,7 @@ import static com.codeborne.selenide.Selenide.$x;
 
 public class CalendarComponent {
     // Calendar locators
-    private final String panelCalendar = "//div[@class='rdrCalendarWrapper rdrDateRangeWrapper']";
+    private final String panelCalendar = "//div[contains(@class,'rdrCalendarWrapper')]";
     private final String labelMonthInCalendar = "//div[@class='rdrMonthName']";
     private final String buttonPrevMonth = "//button[@class='rdrNextPrevButton rdrPprevButton']";
     private final String buttonNextMonth = "//button[@class='rdrNextPrevButton rdrNextButton']";

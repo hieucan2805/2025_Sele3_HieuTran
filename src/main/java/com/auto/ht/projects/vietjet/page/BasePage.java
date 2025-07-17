@@ -1,4 +1,4 @@
-package com.auto.ht.vietjet.page;
+package com.auto.ht.projects.vietjet.page;
 
 import com.auto.ht.helpers.LanguageHelper;
 import com.auto.ht.utils.Constants;
@@ -35,8 +35,19 @@ public class BasePage {
 
     @Step("Wait And Cancel Ads")
     public void cancelAds() {
-        $x(buttonCloseAdsInfo).shouldBe(visible, Constants.SHORT_WAIT).click();
+
+        $x(buttonCloseAdsInfo).shouldBe(visible,Constants.MEDIUM_WAIT).click();
         log.info("Close ads pop-up");
+        try {
+            if ($x(buttonCloseAdsInfo).is(visible)) {
+                $x(buttonCloseAdsInfo).click();
+                log.info("Close ads pop-up");
+            } else {
+                log.info("Ads pop-up did not appear");
+            }
+        } catch (Exception e) {
+            log.info("Ads pop-up did not appear or couldn't be closed: {}", e.getMessage());
+        }
     }
 
     @Step("Change Language to {language}")

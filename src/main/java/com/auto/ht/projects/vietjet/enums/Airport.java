@@ -1,4 +1,4 @@
-package com.auto.ht.vietjet.enums;
+package com.auto.ht.projects.vietjet.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

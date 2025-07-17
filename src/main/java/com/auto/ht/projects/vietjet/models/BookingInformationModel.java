@@ -1,4 +1,4 @@
-package com.auto.ht.models;
+package com.auto.ht.projects.vietjet.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,4 +16,12 @@ public class BookingInformationModel {
     private String duration;
     private PassengerModel passenger;
 
+    public BookingInformationModel() {
+        this.type = "ONE_WAY"; // Default type
+        this.from = "";
+        this.to = "";
+        this.departureDate = "";
+        this.duration = "";
+        this.passenger = new PassengerModel();
+    }
 }
