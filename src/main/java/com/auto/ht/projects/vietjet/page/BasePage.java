@@ -35,15 +35,11 @@ public class BasePage {
 
     @Step("Wait And Cancel Ads")
     public void cancelAds() {
-
         $x(buttonCloseAdsInfo).shouldBe(visible,Constants.MEDIUM_WAIT).click();
         log.info("Close ads pop-up");
         try {
             if ($x(buttonCloseAdsInfo).is(visible)) {
                 $x(buttonCloseAdsInfo).click();
-                log.info("Close ads pop-up");
-            } else {
-                log.info("Ads pop-up did not appear");
             }
         } catch (Exception e) {
             log.info("Ads pop-up did not appear or couldn't be closed: {}", e.getMessage());
@@ -73,7 +69,6 @@ public class BasePage {
 
         return Boolean.TRUE.equals(visible); // an toàn nếu visible là null
     }
-
 
     public void scrollToElement(SelenideElement element) {
         while (!isElementInViewport(element)) {

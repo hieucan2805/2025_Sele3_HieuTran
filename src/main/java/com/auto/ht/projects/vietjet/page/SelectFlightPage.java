@@ -29,6 +29,9 @@ public class SelectFlightPage extends BasePage {
     private final String labelVJAAtTheBottomPage = "//div/p[text()='VJ - Vietjet Air']";
     private final String labelFlightPrice = "//div/p[text()='%s']//following-sibling::div/h4";
     private final String buttonContinue = "//button//span[text()='%s']";
+    private final String labelTypeAndPassenger = "//img[@src='/static/media/departure-icon.25d3557e.svg']//parent::div//preceding-sibling::p";
+    private final String loadingTicketIcon = "//div[@id='progress']";
+    ;
 
     //Action
     public ElementsCollection getAllElementsCollectionFlightPrices() {
@@ -59,12 +62,27 @@ public class SelectFlightPage extends BasePage {
                 .collect(Collectors.toList());
     }
 
+    @Step("Wait until loading icon disappears")
+    public void waitLoadingIconDisappear() {
+        try {
+            // First attempt to wait for loading icon to disappear
+            $x(loadingTicketIcon).shouldNotBe(visible, Constants.MEDIUM_WAIT);
+            log.info("Loading icon has disappeared.");
+        } catch (Exception e) {
+            log.info("Loading icon still visible. Refreshing page once...");
+            refresh();
+            $x(loadingTicketIcon).shouldNotBe(visible, Constants.MEDIUM_WAIT);
+
+        }
+    }
+    @Step("Scroll to the bottom of the page to load all flight prices")
     public void scrollToBottomPage() {
         scrollToElement($x(labelVJAAtTheBottomPage));
     }
 
     public void selectLowestPriceTicket() {
         try {
+            waitLoadingIconDisappear();
             // First try to close any notification frames or overlays
             iFrameHelper.handleInterceptingFrames();
 
@@ -125,10 +143,13 @@ public class SelectFlightPage extends BasePage {
         selectCheapestTicketForDepartureFlight();
         clickContinueButton();
 
-        //TODO: Add a wait for the return flight section to be visible
-        selectCheapestTicketForReturnFlight();
-        clickContinueButton();
+        if (getTypeOfFlightText().equalsIgnoreCase(localeBundle.getLocalizedText("text.ReturnFlight"))) {
+            selectCheapestTicketForReturnFlight();
+            clickContinueButton();
+        }
+
     }
+
 
     /**
      * Search for a specific price.
@@ -184,5 +205,9 @@ public class SelectFlightPage extends BasePage {
                 .orElseThrow(() -> new IllegalStateException("No prices found"));
     }
 
+    public String getTypeOfFlightText() {
+        String tmp_text = $x(labelTypeAndPassenger).shouldBe(visible, Constants.SHORT_WAIT).getText();
+        return tmp_text.split("\\|")[0].trim();
+    }
 
 }

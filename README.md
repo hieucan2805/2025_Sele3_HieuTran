@@ -12,18 +12,25 @@ A robust Java-based test automation framework using Maven, Selenide, and TestNG.
 
 ## Features
 - [x] Selenide FW (JAVA 21, Selenide 7.9.3)
-- [x] Reports with HTML, Allure and Report Portal (Allure and TestNG HTML)
+- [x] Reports with HTML, Allure and Report Portal
+-  [x] Allure 
+-  [x] TestNG HTML
 - [x] Test retry (Retry maximum 2 times when failure)
-- [x] Parallel/distributed testing (Using TestNG Parallel)
+- [ ] Parallel/distributed testing (Using TestNG Parallel)
+  - [x] Parallel execution with multiple threads
+  - [ ] Parallel execution with multiple browsers
 - [x] Cross browsers testing (Microsoft Edge, Google Chrome)
-- [x] Multiple languages testing (Testing on Vietnamese and English)
+- [x] Multiple languages testing
+  - [x] Vietnamese 
+  - [x] English
 - [ ] Selenium Grid/Shard
 - [ ] CI
 - [ ] Content testing
 - [ ] Group tests by purposes
-- [ ] Source control practice
+- [x] Source control practice
 - [ ] Switch test environment
-- [ ] Wrap custom controls
+- [x] Wrap custom controls
+  - [x] Wrap calendar control
 
 ## Setup
 ### Prerequisites
