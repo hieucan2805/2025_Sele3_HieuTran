@@ -2,6 +2,8 @@ package com.auto.ht.projects.vietjet.dataprovider;
 
 import com.auto.ht.projects.vietjet.models.BookingInformationModel;
 import com.auto.ht.projects.vietjet.models.PassengerModel;
+import com.auto.ht.projects.vietjet.page.PassengerInfoPage;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.DataProvider;
 
 import java.util.ArrayList;
@@ -10,10 +12,11 @@ import java.util.Map;
 
 import static com.auto.ht.utils.CSVDataProvider.readCSVData;
 
-public class TestCase001Provider {
+public class VietJetTestcasesDataProvider {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(VietJetTestcasesDataProvider.class);
 
-    @DataProvider(name = "flightSearchDataProvider")
-    public Object[][] flightSearchDataProvider() {
+    @DataProvider(name = "testcase001Data")
+    public Object[][] Testcase001Data() {
         // Load data from CSV file
         String filePath = "src/test/resources/testdatas/vietjet/flight_data.csv";
         List<BookingInformationModel> bookingData = getBookingInformationFromCSV(filePath);
@@ -24,6 +27,19 @@ public class TestCase001Provider {
         }
         return data;
     }
+
+    @DataProvider(name = "testcase002Data")
+    public Object[][] Testcase002Data() {
+        // Load data from CSV file
+        String filePath = "src/test/resources/testdatas/vietjet/flight_data.csv";
+        List<BookingInformationModel> bookingData = getBookingInformationFromCSV(filePath);
+        BookingInformationModel tc002Data = bookingData.get(1);
+
+        // Convert List to Object[][] for DataProvider
+        log.info("Test case 002 data loaded: {}", tc002Data);
+        return new Object[][] { { tc002Data } };
+    }
+
 
     /**
      * Convert CSV data to BookingInformationModel objects
@@ -39,8 +55,8 @@ public class TestCase001Provider {
             booking.setFrom(row.getOrDefault("From", ""));
             booking.setTo(row.getOrDefault("To", ""));
             booking.setDepartureDate(row.getOrDefault("DepartureDate", ""));
-            booking.setDuration(row.getOrDefault("Duration", ""));
-
+            booking.setDuration(row.getOrDefault("Duration", "today"));
+            booking.setRange(row.getOrDefault("Range", ""));
             PassengerModel passenger = new PassengerModel();
             passenger.setAdults(row.getOrDefault("Adults", "1"));
             passenger.setChild(row.getOrDefault("Children", "0"));

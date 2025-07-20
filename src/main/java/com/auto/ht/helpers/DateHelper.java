@@ -121,4 +121,118 @@ public class DateHelper {
 
         return new String[] { day, month + " " + year };
     }
+
+    /**
+     * Get a start date based on a range description like "next 7 days", "next 2 weeks", etc.
+     *
+     * @param range The range description (e.g., "next 7 days")
+     * @return The calculated start date as a LocalDate
+     */
+    public static LocalDate getDateFromRange(String range) {
+        if (range == null || range.trim().isEmpty()) {
+            throw new IllegalArgumentException("Range string cannot be null or empty");
+        }
+
+        String[] rangeParts = range.split(" ");
+        if (rangeParts.length < 3 || !rangeParts[0].equalsIgnoreCase("next")) {
+            throw new IllegalArgumentException("Invalid range format. Expected 'next X unit' format");
+        }
+
+        String rangeUnit = rangeParts[rangeParts.length - 1].toLowerCase();
+        int rangeValue = Integer.parseInt(rangeParts[1]);
+        LocalDate today = LocalDate.now();
+        LocalDate startDateOfRange;
+
+        switch (rangeUnit) {
+            case "day":
+            case "days":
+                startDateOfRange = today.plusDays(1);
+                break;
+            case "week":
+            case "weeks":
+                startDateOfRange = today.plusWeeks(1).with(java.time.DayOfWeek.MONDAY);
+                break;
+            case "month":
+            case "months":
+                startDateOfRange = today.plusMonths(1).withDayOfMonth(1);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported range unit: " + rangeUnit);
+        }
+
+        return startDateOfRange;
+    }
+
+    /**
+     * Extract the duration value from a range string (e.g., "next 7 days" returns 7)
+     *
+     * @param range The range description (e.g., "next 7 days")
+     * @return The duration value as an integer
+     */
+    public static int getDurationFromRange(String range) {
+        if (range == null || range.trim().isEmpty()) {
+            throw new IllegalArgumentException("Range string cannot be null or empty");
+        }
+
+        String[] rangeParts = range.split(" ");
+        if (rangeParts.length < 3 || !rangeParts[0].equalsIgnoreCase("next")) {
+            throw new IllegalArgumentException("Invalid range format. Expected 'next X unit' format");
+        }
+
+        try {
+            return Integer.parseInt(rangeParts[1]);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid number format in range: " + range, e);
+        }
+    }
+
+    /**
+     * Get an end date based on a range description and its start date
+     *
+     * @param range The range description (e.g., "next 7 days")
+     * @param startDate The start date of the range
+     * @return The calculated end date as a LocalDate
+     */
+    public static LocalDate getEndDateFromRange(String range, LocalDate startDate) {
+        if (range == null || range.trim().isEmpty()) {
+            throw new IllegalArgumentException("Range string cannot be null or empty");
+        }
+        if (startDate == null) {
+            throw new IllegalArgumentException("Start date cannot be null");
+        }
+
+        String[] rangeParts = range.split(" ");
+        if (rangeParts.length < 3) {
+            throw new IllegalArgumentException("Invalid range format. Expected 'next X unit' format");
+        }
+
+        String rangeUnit = rangeParts[rangeParts.length - 1].toLowerCase();
+        int rangeValue = Integer.parseInt(rangeParts[1]);
+
+        switch (rangeUnit) {
+            case "day":
+            case "days":
+                return startDate.plusDays(rangeValue);
+            case "week":
+            case "weeks":
+                return startDate.plusWeeks(rangeValue);
+            case "month":
+            case "months":
+                return startDate.plusMonths(rangeValue);
+            default:
+                throw new IllegalArgumentException("Unsupported range unit: " + rangeUnit);
+        }
+    }
+
+    /**
+     * Get both start and end dates from a range description.
+     *
+     * @param range The range description (e.g., "next 7 days")
+     * @return Array containing [startDate, endDate] as LocalDate objects
+     */
+    public static LocalDate[] getDatesFromRange(String range) {
+        LocalDate startDate = getDateFromRange(range);
+        LocalDate endDate = getEndDateFromRange(range, startDate);
+        return new LocalDate[] { startDate, endDate };
+    }
 }

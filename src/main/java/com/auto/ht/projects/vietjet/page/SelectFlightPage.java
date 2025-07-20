@@ -31,7 +31,10 @@ public class SelectFlightPage extends BasePage {
     private final String buttonContinue = "//button//span[text()='%s']";
     private final String labelTypeAndPassenger = "//img[@src='/static/media/departure-icon.25d3557e.svg']//parent::div//preceding-sibling::p";
     private final String loadingTicketIcon = "//div[@id='progress']";
-    ;
+    private final String labelCurrentMonthOfFlight = "//p[text()='%s']//parent::div//following-sibling::div//div[@class='slick-slide slick-active slick-center slick-current']//p[@weight='Bold']";
+    private final String listLPriceOfFlightIn = "//p[text()='%s']//parent::div//following-sibling::div//div[contains(@class,'slick-slide slick-active')]//span[not(contains(text(),'000'))]";
+    private final String butonNextMonth = "//p[text()='%s']//parent::div//following-sibling::div//div[@class='slick-list']//following-sibling::button";
+    private final String buttonPreviousMonth = "//button[@aria-label='Next month']";
 
     //Action
     public ElementsCollection getAllElementsCollectionFlightPrices() {
@@ -75,6 +78,7 @@ public class SelectFlightPage extends BasePage {
 
         }
     }
+
     @Step("Scroll to the bottom of the page to load all flight prices")
     public void scrollToBottomPage() {
         scrollToElement($x(labelVJAAtTheBottomPage));
@@ -140,6 +144,7 @@ public class SelectFlightPage extends BasePage {
     }
 
     public void chooseCheapestTicketAndContinue() {
+        cancelAds();
         selectCheapestTicketForDepartureFlight();
         clickContinueButton();
 
@@ -147,7 +152,6 @@ public class SelectFlightPage extends BasePage {
             selectCheapestTicketForReturnFlight();
             clickContinueButton();
         }
-
     }
 
 
@@ -208,6 +212,33 @@ public class SelectFlightPage extends BasePage {
     public String getTypeOfFlightText() {
         String tmp_text = $x(labelTypeAndPassenger).shouldBe(visible, Constants.SHORT_WAIT).getText();
         return tmp_text.split("\\|")[0].trim();
+    }
+
+    public String getCurrentMonthOfFlight() {
+        String newXpath = localeBundle.updateLocatorWithDynamicText(labelCurrentMonthOfFlight, "text.DepartureFlight");
+        return $x(newXpath).shouldBe(visible, Constants.SHORT_WAIT).getText();
+    }
+
+    public void moveToMonthOfFlight(String month) {
+        String nextButtonXpath = localeBundle.updateLocatorWithDynamicText(butonNextMonth, month);
+
+        while (!getCurrentMonthOfFlight().equalsIgnoreCase(month)) {
+            if (getCurrentMonthOfFlight().compareTo(month) > 0) {
+                $x(buttonPreviousMonth).shouldBe(visible, Constants.SHORT_WAIT).click();
+            } else {
+                $x(nextButtonXpath).shouldBe(visible, Constants.SHORT_WAIT).click();
+            }
+            if (getCurrentMonthOfFlight().equalsIgnoreCase(month)) {
+                log.info("Already on the month: {}", month);
+            }
+        }
+    }
+
+    public List<String> getFlightPricesInCurrentMonth() {
+        String newXpath = localeBundle.updateLocatorWithDynamicText(listLPriceOfFlightIn, "text.DepartureFlight");
+        return $$x(newXpath).filter(visible).stream()
+                .map(SelenideElement::getText)
+                .collect(Collectors.toList());
     }
 
 }

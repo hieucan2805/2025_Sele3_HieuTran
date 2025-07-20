@@ -8,6 +8,9 @@ import io.qameta.allure.Step;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$x;
 
@@ -17,9 +20,9 @@ public class PassengerInfoPage extends BasePage {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(PassengerInfoPage.class);
 
     private final String frmPassengerInfoForm = "//i[@class = 'fa fa-male']/ancestor::div[contains(@style,'padding-bottom')]";
-    private final String labelFrom = "//img[@src='/static/media/departure-icon.25d3557e.svg']//following-sibling::p";
-    private final String labelDestination = "//img[@src='/static/media/arrival-icon.a05c5d78.svg']//following-sibling::p";
-    private final String labelTypeAndPassenger = "//img[@src='/static/media/departure-icon.25d3557e.svg']//parent::div//preceding-sibling::p";
+    private static final String labelFrom = "//img[@src='/static/media/departure-icon.25d3557e.svg']//following-sibling::p";
+    private static final String labelDestination = "//img[@src='/static/media/arrival-icon.a05c5d78.svg']//following-sibling::p";
+    private static final String labelTypeAndPassenger = "//img[@src='/static/media/departure-icon.25d3557e.svg']//parent::div//preceding-sibling::p";
 
     //Method
     @Step("Verify Passenger Info Form is displayed")
@@ -28,23 +31,31 @@ public class PassengerInfoPage extends BasePage {
         return $x(frmPassengerInfoForm).shouldBe(visible, Constants.MEDIUM_WAIT).isDisplayed();
     }
 
+    public static String getFromAirport() {
+        log.info("Getting From Airport");
+        return extractAirportCode($x(labelFrom).shouldBe(visible, Constants.SHORT_WAIT).getText());
+    }
+
     @Step("Verify From Airport")
-    public boolean verifyFromAirport(String airportCode) {
+    public static boolean verifyFromAirport(String airportCode) {
         log.info("Verifying From Airport with code: {}", airportCode);
-        String fromAirport = $x(labelFrom).shouldBe(visible, Constants.SHORT_WAIT).getText();
-        return fromAirport.contains(airportCode);
+        return getFromAirport().contains(airportCode);
+    }
+
+    public static String getDestinationAirport() {
+        log.info("Getting Destination Airport");
+        return extractAirportCode($x(labelDestination).shouldBe(visible, Constants.SHORT_WAIT).getText());
     }
 
     @Step("Verify Destination Airport")
-    public boolean verifyDestinationAirport(String airportName) {
+    public static boolean verifyDestinationAirport(String airportName) {
         log.info("Verifying Destination Airport with name: {}", airportName);
-        String toAirport = $x(labelDestination).shouldBe(visible, Constants.SHORT_WAIT).getText();
-        return toAirport.contains(airportName);
+        return getDestinationAirport().contains(airportName);
     }
 
-    public String getTypeOfFlightText() {
+    public static String getTypeOfFlightText() {
         String tmp_text = $x(labelTypeAndPassenger).shouldBe(visible, Constants.SHORT_WAIT).getText();
-        return tmp_text.split("\\|")[0].trim();
+        return (tmp_text.split("\\|")[0].trim()).replaceAll("[^A-Z]", "").toLowerCase().replace("flight", "");
     }
 
     @Step("Verify Type of Flight")
@@ -54,7 +65,7 @@ public class PassengerInfoPage extends BasePage {
         return flightType.equalsIgnoreCase(typeOfFlight);
     }
 
-    public PassengerModel getPassengerInfo() {
+    public static PassengerModel getPassengerInfo() {
         String tmp_text = ($x(labelTypeAndPassenger).shouldBe(visible, Constants.SHORT_WAIT).getText()).split("\\|")[1].trim();
         // Extract passenger information from the text
         if (tmp_text.isEmpty()) {
@@ -80,5 +91,21 @@ public class PassengerInfoPage extends BasePage {
                 verifyDestinationAirport(ticketInfo.getTo()) &&
                 verifyTypeOfFlight(ticketInfo.getType()) &&
                 verifyPassengerInfo(ticketInfo.getPassenger());
+    }
+
+    public static String extractAirportCode(String fullText) {
+        if (fullText == null || fullText.isEmpty()) {
+            throw new IllegalArgumentException("Input text is null or empty.");
+        }
+
+        // Regex tìm 3 chữ in hoa nằm trong dấu ngoặc, ví dụ: ( HAN )
+        Pattern pattern = Pattern.compile("\\((\\s*[A-Z]{3})\\s*\\)");
+        Matcher matcher = pattern.matcher(fullText);
+
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        } else {
+            throw new IllegalArgumentException("There is no airport code in: [" + fullText + "]");
+        }
     }
 }

@@ -3,6 +3,8 @@ package com.auto.ht.components;
 import com.auto.ht.helpers.DateHelper;
 import com.auto.ht.utils.Constants;
 import io.qameta.allure.Step;
+import java.time.LocalDate;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$x;
@@ -124,4 +126,6 @@ public class CalendarComponent {
     public boolean isCalendarVisible() {
         return $x(panelCalendar).isDisplayed();
     }
+
+
 }

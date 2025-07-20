@@ -1,6 +1,7 @@
 package com.auto.ht.projects.vietjet.page;
 
 import com.auto.ht.components.CalendarComponent;
+import com.auto.ht.helpers.DateHelper;
 import com.auto.ht.helpers.LocatorHelper;
 import com.auto.ht.projects.vietjet.models.BookingInformationModel;
 import com.auto.ht.projects.vietjet.models.PassengerModel;
@@ -8,6 +9,8 @@ import com.auto.ht.utils.*;
 import io.qameta.allure.Step;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
@@ -31,6 +34,7 @@ public class HomePage extends BasePage {
     private final String buttonIncreasePassenger = "//div[div[div[img[@alt='%s']]]]//button[2]";
     private final String buttonSpecialAssistanceRequest = "//span[@customcolor='hint']";
     private final String buttonSearchFlight = "//button[@tabindex='0']//span[text()]/parent::button";
+    private final String labelCheapestFare = "//h3[text()='%s']";
 
     //Actions block
     @Step("Select the {typeFlight} Flight")
@@ -122,6 +126,11 @@ public class HomePage extends BasePage {
             $x(dropdownPassenger).click();
     }
 
+    public void clickCheapestFlightCheckbox() {
+       String newXpath = localeBundle.updateLocatorWithDynamicText(labelCheapestFare, "text.cheapestFare");
+        $x(newXpath).shouldBe(visible, Constants.SHORT_WAIT).click();
+    }
+
     public void clickSearch() {
         $x(buttonSearchFlight).shouldBe(visible, Constants.VERY_SHORT_WAIT).click();
     }
@@ -141,10 +150,61 @@ public class HomePage extends BasePage {
         collapsePassengerPanel();
     }
 
+    @Step("Fill information to search to find the cheapest flight")
+    public void fillFlightInfoWithRange(BookingInformationModel bookingInformationModel) {
+        clickTypeOfFlight(bookingInformationModel.getType());
+
+        selectAirport(bookingInformationModel.getFrom(), bookingInformationModel.getTo());
+
+        if (bookingInformationModel.getDuration().isEmpty() || bookingInformationModel.getType().equalsIgnoreCase("oneway")) {
+            selectDateInCalendar(findStartDate(bookingInformationModel.getRange()));
+        } else {
+            selectDepartureDateAndDuration(findStartDate(bookingInformationModel.getRange()), bookingInformationModel.getDuration()
+            );
+        }
+
+        inputPassenger(bookingInformationModel.getPassenger());
+        collapsePassengerPanel();
+
+        clickCheapestFlightCheckbox();
+    }
+
     @Step("Search Flight with information")
     public void searchFlightWithInfo(BookingInformationModel bookingInformationModel) {
-        fillFlightInfo(bookingInformationModel);
-
+        if (!bookingInformationModel.getDepartureDate().isEmpty()) {
+            log.info("Searching flight with departure date: {}", bookingInformationModel.getDepartureDate());
+            fillFlightInfo(bookingInformationModel);
+        } else {
+            log.info("Searching flight with range: {}", bookingInformationModel.getRange());
+            fillFlightInfoWithRange(bookingInformationModel);
+        }
         clickSearch();
+    }
+
+    public String findStartDate(String range) {
+        // Use the new DateHelper method to get the start date from range
+        LocalDate startDateOfRange = DateHelper.getDateFromRange(range);
+        return startDateOfRange.toString();
+    }
+
+    public String findEndDate(String range) {
+        // Use the new DateHelper method to get the end date from range
+        LocalDate startDateOfRange = DateHelper.getDateFromRange(range);
+        LocalDate endDateOfRange = DateHelper.getEndDateFromRange(range, startDateOfRange);
+        return endDateOfRange.toString();
+    }
+
+    /**
+     * Find both start and end dates based on a range description
+     *
+     * @param range The range description (e.g., "next 7 days")
+     * @return An array containing [startDate, endDate] as strings
+     */
+    public String[] findStartAndEndDates(String range) {
+        LocalDate[] dates = DateHelper.getDatesFromRange(range);
+        return new String[]{
+                dates[0].toString(),
+                dates[1].toString()
+        };
     }
 }
