@@ -12,9 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static com.codeborne.selenide.Selenide.getUserAgent;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
@@ -96,16 +100,25 @@ public class BaseTest {
     private void cleanupTempUserDataDir() {
         if (tempUserDataDir != null && !tempUserDataDir.isEmpty()) {
             try {
-                File userDataDir = new File(tempUserDataDir);
-                if (userDataDir.exists()) {
+                Path userDataDirPath = Paths.get(tempUserDataDir);
+                if (Files.exists(userDataDirPath)) {
                     log.info("Cleaning up temporary Chrome user data directory: {}", tempUserDataDir);
-                    // In a real implementation, you might want to use FileUtils or similar to delete directories
-                    // This is simplified for demonstration
-                    // FileUtils.deleteDirectory(userDataDir);
-                    log.info("Temporary Chrome user data directory marked for deletion");
+                    // Recursively delete the directory and all its contents using try-with-resources
+                    try (Stream<Path> pathStream = Files.walk(userDataDirPath)) {
+                        pathStream.sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(file -> {
+                                boolean deleted = file.delete();
+                                if (!deleted) {
+                                    log.warn("Failed to delete file: {}", file.getAbsolutePath());
+                                }
+                            });
+                    }
+                    log.info("Successfully cleaned up Chrome user data directory");
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 log.error("Failed to clean up Chrome user data directory: {}", e.getMessage());
+                log.debug("Full stack trace for Chrome user data directory cleanup failure", e);
             }
         }
     }
