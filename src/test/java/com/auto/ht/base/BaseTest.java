@@ -89,8 +89,14 @@ public class BaseTest {
         } catch (Exception e) {
             log.error("Error in tearDown: {}", e.getMessage());
         } finally {
-            // Close the browser after each test
-            Selenide.closeWebDriver();
+            // Only close browser if it was started
+            try {
+                if (getWebDriver() != null) {
+                    Selenide.closeWebDriver();
+                }
+            } catch (Exception ignored) {
+                // No webdriver to close
+            }
         }
     }
 
@@ -156,10 +162,10 @@ public class BaseTest {
 
         // Create Chrome options with unique user data directory
         ChromeOptions options = new ChromeOptions();
-
-        // Configure Chrome for CI environment with special settings but keep user data dir
+        // CI detection
+        isCI = System.getenv("CI") != null || System.getenv("GITHUB_ACTIONS") != null;
         if (isCI) {
-            // These options make Chrome use minimal persistent storage
+            // CI flags
             options.addArguments("--incognito");
             options.addArguments("--disable-application-cache");
             options.addArguments("--disable-extensions");
@@ -169,14 +175,14 @@ public class BaseTest {
             options.addArguments("--no-default-browser-check");
             options.addArguments("--no-first-run");
         }
-
-        // Always provide a valid user data directory - Chrome requires this
-        options.addArguments("--user-data-dir=" + tempUserDataDir);
-
-        // Add other useful Chrome options for CI environments
+        // Add other useful Chrome options
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
+        // Enforce headless in CI
+        if (isCI) {
+            options.addArguments("--headless=new");
+        }
 
         // Set the browser capabilities with our options
         DesiredCapabilities capabilities = new DesiredCapabilities();
@@ -215,9 +221,7 @@ public class BaseTest {
                     chromeOptions.addArguments("--disable-dev-shm-usage");
                     chromeOptions.addArguments("--disable-gpu");
 
-                    // Generate a unique user data directory for remote Chrome sessions
-                    String uniqueId = UUID.randomUUID().toString();
-                    chromeOptions.addArguments("--user-data-dir=/tmp/chrome_profile_" + uniqueId);
+                    // Use default ephemeral profile to avoid user-data-dir conflicts
 
                     capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
                     Configuration.browserCapabilities = capabilities;
