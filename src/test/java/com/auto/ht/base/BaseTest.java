@@ -12,14 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 import static com.codeborne.selenide.Selenide.getUserAgent;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static com.codeborne.selenide.WebDriverRunner.isHeadless;
@@ -28,7 +20,6 @@ import static java.lang.invoke.MethodHandles.lookup;
 
 public class BaseTest {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
-    private String tempUserDataDir; // To store user data dir path for cleanup
 
     @BeforeMethod
     public void setup() {
@@ -83,118 +74,36 @@ public class BaseTest {
                                 .build(), System.getProperty("user.dir") + "/allure-results/");
             }
 
-            // Clean up any temporary user data directory
-            cleanupTempUserDataDir();
-
+            // no cleanup needed
         } catch (Exception e) {
             log.error("Error in tearDown: {}", e.getMessage());
         } finally {
-            // Only close browser if it was started
             try {
                 if (getWebDriver() != null) {
                     Selenide.closeWebDriver();
                 }
-            } catch (Exception ignored) {
-                // No webdriver to close
-            }
+            } catch (Exception ignored) {}
         }
     }
 
     /**
-     * Cleans up any temporary Chrome user data directory that was created
-     */
-    private void cleanupTempUserDataDir() {
-        if (tempUserDataDir != null && !tempUserDataDir.isEmpty()) {
-            try {
-                Path userDataDirPath = Paths.get(tempUserDataDir);
-                if (Files.exists(userDataDirPath)) {
-                    log.info("Cleaning up temporary Chrome user data directory: {}", tempUserDataDir);
-                    // Recursively delete the directory and all its contents using try-with-resources
-                    try (Stream<Path> pathStream = Files.walk(userDataDirPath)) {
-                        pathStream.sorted(Comparator.reverseOrder())
-                            .map(Path::toFile)
-                            .forEach(file -> {
-                                boolean deleted = file.delete();
-                                if (!deleted) {
-                                    log.warn("Failed to delete file: {}", file.getAbsolutePath());
-                                }
-                            });
-                    }
-                    log.info("Successfully cleaned up Chrome user data directory");
-                }
-            } catch (IOException e) {
-                log.error("Failed to clean up Chrome user data directory: {}", e.getMessage());
-                log.debug("Full stack trace for Chrome user data directory cleanup failure", e);
-            }
-        }
-    }
-
-    /**
-     * Configures Chrome browser for local execution with unique user data directory
+     * Configures Chrome browser for local execution
      */
     private void configureChromeForLocalExecution() {
-        // Create a unique user data directory for this test run
-        String uniqueId = UUID.randomUUID().toString();
-        String timestamp = String.valueOf(System.currentTimeMillis());
-
-        // In CI environments, ensure we use a completely unique path
-        boolean isCI = System.getenv("CI") != null || System.getenv("GITHUB_ACTIONS") != null;
-
-        // Always create a unique directory path, even for CI
-        if (isCI) {
-            // For CI, use a path in the workspace that's guaranteed to be unique and writable
-            tempUserDataDir = Paths.get(System.getProperty("user.dir"), "chrome_profile_" + uniqueId + "_" + timestamp).toString();
-            log.info("CI environment detected, using workspace chrome profile path: {}", tempUserDataDir);
-        } else {
-            // For local execution, use the temp directory
-            tempUserDataDir = Paths.get(System.getProperty("java.io.tmpdir"), "chrome_profile_" + uniqueId + "_" + timestamp).toString();
-        }
-
-        log.info("Setting up Chrome with unique user data directory: {}", tempUserDataDir);
-
-        // Create the directory if it doesn't exist
-        try {
-            Files.createDirectories(Paths.get(tempUserDataDir));
-            log.info("Successfully created Chrome user data directory: {}", tempUserDataDir);
-        } catch (IOException e) {
-            log.error("Failed to create user data directory: {}", e.getMessage());
-        }
-
-        // Create Chrome options with unique user data directory
+        // Simplified Chrome options
         ChromeOptions options = new ChromeOptions();
-        // CI detection
-        isCI = System.getenv("CI") != null || System.getenv("GITHUB_ACTIONS") != null;
-        if (isCI) {
-            // CI flags
-            options.addArguments("--incognito");
-            options.addArguments("--disable-application-cache");
-            options.addArguments("--disable-extensions");
-            options.addArguments("--disable-plugins");
-            options.addArguments("--disable-notifications");
-            options.addArguments("--disable-infobars");
-            options.addArguments("--no-default-browser-check");
-            options.addArguments("--no-first-run");
-        }
-        // Add other useful Chrome options
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-gpu");
-        // Enforce headless in CI
-        if (isCI) {
+        options.addArguments("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu");
+        if (Configuration.headless) {
             options.addArguments("--headless=new");
         }
 
-        // Set the browser capabilities with our options
         DesiredCapabilities capabilities = new DesiredCapabilities();
         capabilities.setCapability(ChromeOptions.CAPABILITY, options);
         Configuration.browserCapabilities = capabilities;
     }
 
     /**
-     * Configures Selenide to run tests on Selenium Grid with browser-specific capabilities
-     *
-     * @param browser the browser to use (chrome, edge)
-     * @param remoteUrl the Selenium Grid URL to connect to
+     * Configures Selenide to run tests on Selenium Grid
      */
     private void configureSeleniumGrid(String browser, String remoteUrl) {
         Configuration.remote = remoteUrl;
@@ -221,8 +130,6 @@ public class BaseTest {
                     chromeOptions.addArguments("--disable-dev-shm-usage");
                     chromeOptions.addArguments("--disable-gpu");
 
-                    // Use default ephemeral profile to avoid user-data-dir conflicts
-
                     capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
                     Configuration.browserCapabilities = capabilities;
                     break;
@@ -235,4 +142,3 @@ public class BaseTest {
         }
     }
 }
-
