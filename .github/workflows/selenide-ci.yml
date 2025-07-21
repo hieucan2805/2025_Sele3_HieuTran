@@ -44,6 +44,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Get start time
+        id: get_start_time
+        run: echo "start_time=$(date +%Y-%m-%dT%H:%M:%S)" >> $GITHUB_ENV
+
       - name: Checkout source code
         uses: actions/checkout@v4
 
@@ -128,26 +132,33 @@ jobs:
             allure-results/
             testng-report/
 
-      - name: Send test result email
-        if: always()  # Both on success and failure
+      - name: Send test‑result email
+        if: always()               # Both on success and failure
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "[AGEST][SELE3] Test Result - ${{ job.status }} - ${{ start_time }}"
-          to: hieucan1991@gmail.com
-          from: ${{ secrets.MAIL_USERNAME }}
+          to:       hieucan1991@gmail.com
+          from:     ${{ secrets.MAIL_USERNAME }}
+
+          subject: >
+            [AGEST][SELE3] Test Result – ${{ job.status }} – ${{ steps.get_start_time.outputs.start_time }}
+
           body: |
             Hello,
             
             Test run has completed.
             
-            - Status: ${{ job.status }}
-            - See details in the attached report.
+            • Status     : ${{ job.status }}
+            • Start time : ${{ steps.get_start_time.outputs.start_time }}
+            
+            See details in the attached report.
             
             Regards,
             GitHub Actions
+
           attachments: |
             target/allure-report/index.html
+
