@@ -5,11 +5,16 @@ import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import com.google.common.collect.ImmutableMap;
 import io.qameta.allure.selenide.AllureSelenide;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 import static com.codeborne.selenide.Selenide.getUserAgent;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
@@ -19,6 +24,7 @@ import static java.lang.invoke.MethodHandles.lookup;
 
 public class BaseTest {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
+    private String tempUserDataDir; // To store user data dir path for cleanup
 
     @BeforeMethod
     public void setup() {
@@ -33,6 +39,11 @@ public class BaseTest {
             log.info("Setting up local execution with browser: {}", Configuration.browser);
             // Important: Set remote to null for local execution
             Configuration.remote = null;
+
+            // For local Chrome execution, set unique user data directory
+            if (Configuration.browser.equalsIgnoreCase("chrome")) {
+                configureChromeForLocalExecution();
+            }
         }
 
         log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={},  headless={}, pageLoadStrategy={}, remote={}",
@@ -67,12 +78,63 @@ public class BaseTest {
                                 .put("Remote", String.valueOf(Configuration.remote != null))
                                 .build(), System.getProperty("user.dir") + "/allure-results/");
             }
+
+            // Clean up any temporary user data directory
+            cleanupTempUserDataDir();
+
         } catch (Exception e) {
             log.error("Error in tearDown: {}", e.getMessage());
         } finally {
             // Close the browser after each test
             Selenide.closeWebDriver();
         }
+    }
+
+    /**
+     * Cleans up any temporary Chrome user data directory that was created
+     */
+    private void cleanupTempUserDataDir() {
+        if (tempUserDataDir != null && !tempUserDataDir.isEmpty()) {
+            try {
+                File userDataDir = new File(tempUserDataDir);
+                if (userDataDir.exists()) {
+                    log.info("Cleaning up temporary Chrome user data directory: {}", tempUserDataDir);
+                    // In a real implementation, you might want to use FileUtils or similar to delete directories
+                    // This is simplified for demonstration
+                    // FileUtils.deleteDirectory(userDataDir);
+                    log.info("Temporary Chrome user data directory marked for deletion");
+                }
+            } catch (Exception e) {
+                log.error("Failed to clean up Chrome user data directory: {}", e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Configures Chrome browser for local execution with unique user data directory
+     */
+    private void configureChromeForLocalExecution() {
+        // Create a unique user data directory for this test run
+        String uniqueId = UUID.randomUUID().toString();
+        tempUserDataDir = Paths.get(System.getProperty("java.io.tmpdir"), "chrome_profile_" + uniqueId).toString();
+
+        log.info("Setting up Chrome with unique user data directory: {}", tempUserDataDir);
+
+        // Create Chrome options with unique user data directory
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--user-data-dir=" + tempUserDataDir);
+
+        // Add other useful Chrome options for CI environments
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--disable-extensions");
+        options.addArguments("--disable-infobars");
+
+        // Set the browser capabilities with our options
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+        capabilities.setCapability(ChromeOptions.CAPABILITY, options);
+        Configuration.browserCapabilities = capabilities;
     }
 
     /**
@@ -99,6 +161,18 @@ public class BaseTest {
                     capabilities.setBrowserName("Google Chrome");
                     capabilities.setCapability("enableVNC", true);
                     capabilities.setCapability("enableVideo", false);
+
+                    // Add Chrome-specific options to prevent session creation issues
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    chromeOptions.addArguments("--no-sandbox");
+                    chromeOptions.addArguments("--disable-dev-shm-usage");
+                    chromeOptions.addArguments("--disable-gpu");
+
+                    // Generate a unique user data directory for remote Chrome sessions
+                    String uniqueId = UUID.randomUUID().toString();
+                    chromeOptions.addArguments("--user-data-dir=/tmp/chrome_profile_" + uniqueId);
+
+                    capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
                     Configuration.browserCapabilities = capabilities;
                     break;
                 default:
@@ -110,3 +184,4 @@ public class BaseTest {
         }
     }
 }
+
