@@ -129,13 +129,51 @@ public class BaseTest {
     private void configureChromeForLocalExecution() {
         // Create a unique user data directory for this test run
         String uniqueId = UUID.randomUUID().toString();
-        tempUserDataDir = Paths.get(System.getProperty("java.io.tmpdir"), "chrome_profile_" + uniqueId).toString();
+        String timestamp = String.valueOf(System.currentTimeMillis());
+
+        // In CI environments, ensure we use a completely unique path
+        boolean isCI = System.getenv("CI") != null || System.getenv("GITHUB_ACTIONS") != null;
+
+        if (isCI) {
+            // For CI, use a path in the workspace that's guaranteed to be unique and writable
+            tempUserDataDir = Paths.get(System.getProperty("user.dir"), "chrome_profile_" + uniqueId + "_" + timestamp).toString();
+            log.info("CI environment detected, using workspace chrome profile path: {}", tempUserDataDir);
+        } else {
+            // For local execution, use the temp directory
+            tempUserDataDir = Paths.get(System.getProperty("java.io.tmpdir"), "chrome_profile_" + uniqueId + "_" + timestamp).toString();
+        }
 
         log.info("Setting up Chrome with unique user data directory: {}", tempUserDataDir);
 
+        // Create the directory if it doesn't exist
+        try {
+            Files.createDirectories(Paths.get(tempUserDataDir));
+            log.info("Successfully created Chrome user data directory: {}", tempUserDataDir);
+        } catch (IOException e) {
+            log.error("Failed to create user data directory: {}", e.getMessage());
+        }
+
         // Create Chrome options with unique user data directory
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--user-data-dir=" + tempUserDataDir);
+
+        // Completely disable user data directory in CI if we can't get it to work reliably
+        if (isCI) {
+            // These options make Chrome not use a persistent profile at all
+            options.addArguments("--incognito");
+            options.addArguments("--disable-application-cache");
+            options.addArguments("--disable-user-media-security");
+            options.addArguments("--disable-web-security");
+            options.addArguments("--no-default-browser-check");
+            options.addArguments("--no-first-run");
+            options.addArguments("--password-store=basic");
+            options.addArguments("--use-mock-keychain");
+
+            // Explicitly tell Chrome not to use a user data directory
+            options.addArguments("--user-data-dir=");
+        } else {
+            // For local execution, use our unique directory
+            options.addArguments("--user-data-dir=" + tempUserDataDir);
+        }
 
         // Add other useful Chrome options for CI environments
         options.addArguments("--no-sandbox");
