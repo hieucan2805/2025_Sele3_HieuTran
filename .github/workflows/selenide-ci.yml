@@ -1,148 +1,129 @@
-name: CI/CD Pipeline
+name: Selenide Automation Tests
 
-# Define global environment variables
 env:
   JAVA_VERSION: '21'
   JAVA_DISTRIBUTION: 'temurin'
-  MAVEN_CACHE_ENABLED: 'true'
   SELENIUM_HUB_PORT: 4444
   SELENIUM_VERSION: '4.13.0'
-  APP_NAME: 'my-app'
-  PRODUCTION_URL: 'https://yourapp.com'
-  SECRET_KEY: ${{ secrets.SECRET_KEY }}
-  LOGIN_PASSWORD: ${{ secrets.LOGIN_PASSWORD }}
 
 on:
   push:
-    branches: [ main, update-framework-2 ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Browser to run tests on'
+        required: true
+        default: 'chrome'
+        type: choice
+        options:
+        - chrome
+        - edge
+      project:
+        description: 'Project to test'
+        required: true
+        default: 'VjAir'
+        type: choice
+        options:
+        - VjAir
+        - Agoda
+      headless:
+        description: 'Run in headless mode'
+        required: true
+        default: true
+        type: boolean
+      use_grid:
+        description: 'Use Selenium Grid'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: maven
-
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml -DskipTests
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-package
-          path: target/*.jar
-
-  code-quality:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: maven
-
-      - name: Run SonarQube analysis
-        run: mvn -B verify sonar:sonar -Dsonar.projectKey=${{ env.APP_NAME }} -Dsonar.organization=my-org -Dsonar.host.url=https://sonarcloud.io
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   test:
     runs-on: ubuntu-latest
-    services:
-      selenium-hub:
-        image: selenium/hub:${{ env.SELENIUM_VERSION }}
-        ports:
-          - ${{ env.SELENIUM_HUB_PORT }}:4444
-      chrome:
-        image: selenium/node-chrome:${{ env.SELENIUM_VERSION }}
-        volumes:
-          - /dev/shm:/dev/shm
-        env:
-          SE_EVENT_BUS_HOST: selenium-hub
-          SE_EVENT_BUS_PUBLISH_PORT: 4442
-          SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
-          SE_NODE_MAX_SESSIONS: 4
-        options: --shm-size="2g"
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           java-version: ${{ env.JAVA_VERSION }}
           cache: maven
 
-      - name: Run tests with Maven
-        run: mvn clean test -Dselenide.remote=http://localhost:${{ env.SELENIUM_HUB_PORT }}/wd/hub
-        env:
-          TEST_ENVIRONMENT: 'CI'
-          BROWSER: 'chrome'
-          HEADLESS: 'true'
+      - name: Setup Selenium Grid
+        if: ${{ github.event.inputs.use_grid != false }}
+        run: |
+          docker-compose up -d
 
-      - name: Upload test reports
+      - name: Wait for Selenium Grid
+        if: ${{ github.event.inputs.use_grid != false }}
+        run: |
+          echo "Waiting for Selenium Grid to be ready..."
+          timeout=60
+          start_time=$(date +%s)
+          while ! curl -sSL "http://localhost:${{ env.SELENIUM_HUB_PORT }}/wd/hub/status" | grep -q "\"ready\":true"; do
+            current_time=$(date +%s)
+            elapsed=$((current_time - start_time))
+            if [ $elapsed -gt $timeout ]; then
+              echo "Timed out waiting for Selenium Grid"
+              exit 1
+            fi
+            echo "Waiting for Selenium Grid... ($elapsed seconds)"
+            sleep 2
+          done
+          echo "Selenium Grid is ready!"
+
+      - name: Run Tests
+        run: |
+          # Determine which browser and project to run based on workflow dispatch inputs or default values
+          BROWSER="${{ github.event.inputs.browser || 'chrome' }}"
+          PROJECT="${{ github.event.inputs.project || 'VjAir' }}"
+          HEADLESS="${{ github.event.inputs.headless }}"
+          USE_GRID="${{ github.event.inputs.use_grid }}"
+          
+          # Convert boolean inputs to selenide parameter format
+          if [ "$HEADLESS" = "true" ]; then
+            HEADLESS_PARAM="true"
+          else
+            HEADLESS_PARAM="false"
+          fi
+          
+          # Set remote URL based on grid usage preference
+          REMOTE_URL=""
+          if [ "$USE_GRID" = "true" ]; then
+            REMOTE_URL="http://localhost:${{ env.SELENIUM_HUB_PORT }}/wd/hub"
+          else
+            REMOTE_URL="false"
+          fi
+          
+          # Run tests with Maven
+          mvn clean test \
+            -Dselenide.browser="$BROWSER" \
+            -Dselenide.remote="$REMOTE_URL" \
+            -Dselenide.projectName="$PROJECT" \
+            -Dselenide.headless="$HEADLESS_PARAM"
+
+      - name: Generate Allure Report
+        if: always()
+        run: mvn allure:report
+
+      - name: Upload Allure Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: surefire-reports
-          path: target/surefire-reports/
+          name: allure-report
+          path: target/site/allure-maven-plugin/
 
-      - name: Upload screenshots on failure
-        if: failure()
+      - name: Upload Test Results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshots
-          path: target/screenshots/
-
-  deploy-staging:
-    needs: [ build, test ]
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    environment:
-      name: staging
-      url: https://staging.yourapp.com
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: app-package
-
-      - name: Deploy to staging
-        run: echo "Deploy to staging environment"
-        env:
-          DEPLOY_ENV: 'staging'
-          API_KEY: ${{ secrets.STAGING_API_KEY }}
-
-  deploy-production:
-    needs: deploy-staging
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: ${{ env.PRODUCTION_URL }}
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: app-package
-
-      - name: Deploy to production
-        run: echo "Deploy to production environment"
-        env:
-          DEPLOY_ENV: 'production'
-          API_KEY: ${{ secrets.PRODUCTION_API_KEY }}
+          name: test-results
+          path: |
+            target/surefire-reports/
+            allure-results/
+            testng-report/
