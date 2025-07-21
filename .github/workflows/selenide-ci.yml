@@ -127,3 +127,27 @@ jobs:
             target/surefire-reports/
             allure-results/
             testng-report/
+
+      - name: Send test result email
+        if: always()  # Both on success and failure
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Test Result - ${{ job.status }}"
+          to: hieucan1991@gmail.com
+          from: ${{ secrets.MAIL_USERNAME }}
+          body: |
+            Hello,
+            
+            Test run has completed.
+            
+            - Status: ${{ job.status }}
+            - See details in the attached report.
+            
+            Regards,
+            GitHub Actions
+          attachments: |
+            target/allure-report/index.html
