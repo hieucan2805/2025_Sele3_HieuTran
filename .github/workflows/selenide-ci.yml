@@ -136,7 +136,7 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "[AGEST][SELE3] Test Result - ${{ job.status } - ${{ start_time }"
+          subject: "[AGEST][SELE3] Test Result - ${{ job.status }} - ${{ start_time }}"
           to: hieucan1991@gmail.com
           from: ${{ secrets.MAIL_USERNAME }}
           body: |
