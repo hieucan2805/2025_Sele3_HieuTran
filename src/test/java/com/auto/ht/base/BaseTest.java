@@ -134,6 +134,7 @@ public class BaseTest {
         // In CI environments, ensure we use a completely unique path
         boolean isCI = System.getenv("CI") != null || System.getenv("GITHUB_ACTIONS") != null;
 
+        // Always create a unique directory path, even for CI
         if (isCI) {
             // For CI, use a path in the workspace that's guaranteed to be unique and writable
             tempUserDataDir = Paths.get(System.getProperty("user.dir"), "chrome_profile_" + uniqueId + "_" + timestamp).toString();
@@ -156,31 +157,26 @@ public class BaseTest {
         // Create Chrome options with unique user data directory
         ChromeOptions options = new ChromeOptions();
 
-        // Completely disable user data directory in CI if we can't get it to work reliably
+        // Configure Chrome for CI environment with special settings but keep user data dir
         if (isCI) {
-            // These options make Chrome not use a persistent profile at all
+            // These options make Chrome use minimal persistent storage
             options.addArguments("--incognito");
             options.addArguments("--disable-application-cache");
-            options.addArguments("--disable-user-media-security");
-            options.addArguments("--disable-web-security");
+            options.addArguments("--disable-extensions");
+            options.addArguments("--disable-plugins");
+            options.addArguments("--disable-notifications");
+            options.addArguments("--disable-infobars");
             options.addArguments("--no-default-browser-check");
             options.addArguments("--no-first-run");
-            options.addArguments("--password-store=basic");
-            options.addArguments("--use-mock-keychain");
-
-            // Explicitly tell Chrome not to use a user data directory
-            options.addArguments("--user-data-dir=");
-        } else {
-            // For local execution, use our unique directory
-            options.addArguments("--user-data-dir=" + tempUserDataDir);
         }
+
+        // Always provide a valid user data directory - Chrome requires this
+        options.addArguments("--user-data-dir=" + tempUserDataDir);
 
         // Add other useful Chrome options for CI environments
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
-        options.addArguments("--disable-extensions");
-        options.addArguments("--disable-infobars");
 
         // Set the browser capabilities with our options
         DesiredCapabilities capabilities = new DesiredCapabilities();
