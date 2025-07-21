@@ -65,7 +65,7 @@ jobs:
           echo "Waiting for Selenium Grid to be ready..."
           timeout=60
           start_time=$(date +%s)
-          while ! curl -sSL "http://localhost:${{ env.SELENIUM_HUB_PORT }}/wd/hub/status" | grep -q "\"ready\":true"; do
+          while ! curl -sSL "http://localhost:4444/wd/hub/status" | grep -q "\"ready\":true"; do
             current_time=$(date +%s)
             elapsed=$((current_time - start_time))
             if [ $elapsed -gt $timeout ]; then
@@ -95,7 +95,7 @@ jobs:
           # Set remote URL based on grid usage preference
           REMOTE_URL=""
           if [ "$USE_GRID" = "true" ]; then
-            REMOTE_URL="http://localhost:${{ env.SELENIUM_HUB_PORT }}/wd/hub"
+            REMOTE_URL="http://localhost:4444/wd/hub"
           else
             REMOTE_URL="false"
           fi
