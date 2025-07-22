@@ -18,18 +18,33 @@ public class TestConfiguration {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
     private static final String DEFAULT_PROPERTIES_FILE = "src/test/resources/selenide.properties";
     private static final Properties properties = new Properties();
-    
+    private static final WebDriverManager webDriverManager = new WebDriverManager();
+
     /**
      * Initializes the test configuration from properties files
+     *
+     * @param testClassName The name of the test class
+     * @param testMethodName The name of the test method
+     * @return The path to any temporary directory created, for cleanup
      */
-    public static void initializeConfiguration() {
+    public static String initializeConfiguration(String testClassName, String testMethodName) {
+        // Load properties and configure Selenide
         loadProperties();
-
-        // Handle project-specific URL configuration, which is not supported by default Selenide
         handleProjectSpecificUrl();
-
-        // Log key configuration values
         logConfiguration();
+
+        // Configure WebDriver based on settings
+        String tempUserDataDir = webDriverManager.configureWebDriver();
+
+        // Register the temp directory with the listener for cleanup
+        if (tempUserDataDir != null && !tempUserDataDir.isEmpty()) {
+            TestCleanupListener.registerTempDirectory(
+                testClassName + "." + testMethodName,
+                tempUserDataDir
+            );
+        }
+
+        return tempUserDataDir;
     }
     
     /**

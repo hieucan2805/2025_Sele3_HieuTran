@@ -1,7 +1,7 @@
 package com.auto.ht.base;
 
+import com.auto.ht.config.TestCleanupListener;
 import com.auto.ht.config.TestConfiguration;
-import com.auto.ht.config.WebDriverManager;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 
 import static com.codeborne.selenide.Selenide.getUserAgent;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
@@ -18,28 +19,21 @@ import static com.codeborne.selenide.WebDriverRunner.isHeadless;
 import static com.github.automatedowl.tools.AllureEnvironmentWriter.allureEnvironmentWriter;
 import static java.lang.invoke.MethodHandles.lookup;
 
+@Listeners(TestCleanupListener.class)
 public class BaseTest {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
     private String tempUserDataDir; // To store user data dir path for cleanup
-    private final WebDriverManager webDriverManager = new WebDriverManager();
 
     @BeforeMethod
     public void setup() {
-        // Initialize configuration from properties
-        TestConfiguration.initializeConfiguration();
+        // Get the current test method name
+        String testMethodName = Thread.currentThread().getStackTrace()[2].getMethodName();
 
-        // Configure WebDriver based on settings
-        tempUserDataDir = webDriverManager.configureWebDriver();
-
-        // Log configuration
-        log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={}, headless={}, pageLoadStrategy={}, remote={}",
-                Configuration.browser,
-                Configuration.browserSize,
-                Configuration.timeout,
-                Configuration.baseUrl,
-                Configuration.headless,
-                Configuration.pageLoadStrategy,
-                Configuration.remote);
+        // Initialize configuration from properties and set up WebDriver
+        tempUserDataDir = TestConfiguration.initializeConfiguration(
+                getClass().getName(),
+                testMethodName
+        );
 
         // Setup Allure reporting
         SelenideLogger.addListener("AllureSelenide", new AllureSelenide().screenshots(true).savePageSource(true));
@@ -65,9 +59,6 @@ public class BaseTest {
                                 .put("Remote", String.valueOf(Configuration.remote != null))
                                 .build(), System.getProperty("user.dir") + "/allure-results/");
             }
-
-            // Clean up any temporary user data directory using the WebDriverManager
-            webDriverManager.cleanupTempUserDataDir(tempUserDataDir);
 
         } catch (Exception e) {
             log.error("Error in tearDown: {}", e.getMessage());
