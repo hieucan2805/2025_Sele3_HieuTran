@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 import static java.lang.invoke.MethodHandles.lookup;
@@ -23,58 +24,65 @@ public class TestConfiguration {
      */
     public static void initializeConfiguration() {
         loadProperties();
-        configureSelenide();
+
+        // Handle project-specific URL configuration, which is not supported by default Selenide
+        handleProjectSpecificUrl();
+
+        // Log key configuration values
+        logConfiguration();
     }
     
     /**
-     * Loads properties from the properties file
+     * Loads properties from the properties file and sets them as system properties for Selenide to use
      */
     private static void loadProperties() {
         try (FileInputStream fis = new FileInputStream(DEFAULT_PROPERTIES_FILE)) {
             properties.load(fis);
             log.info("Loaded properties from {}", DEFAULT_PROPERTIES_FILE);
+
+            // Set all selenide.* properties as system properties for Selenide to pick up
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
+
+                // Only set system property if it's not already set (to respect command-line overrides)
+                if (System.getProperty(key) == null) {
+                    System.setProperty(key, value);
+                }
+            }
         } catch (IOException e) {
             log.warn("Could not load properties from {}: {}", DEFAULT_PROPERTIES_FILE, e.getMessage());
         }
-        
-        // Load system properties (overrides file properties)
-        properties.putAll(System.getProperties());
     }
     
     /**
-     * Configures Selenide based on loaded properties
+     * Handles project-specific URL configuration based on project name
+     * This is custom functionality not built into Selenide
      */
-    private static void configureSelenide() {
-        // Browser configuration
-        Configuration.browser = getProperty("selenide.browser", "chrome");
-        Configuration.browserSize = getProperty("selenide.browserSize", "1920x1080");
-        Configuration.timeout = Long.parseLong(getProperty("selenide.timeout", "5000"));
-        Configuration.pageLoadStrategy = getProperty("selenide.pageLoadStrategy", "eager");
-        Configuration.baseUrl = getProperty("selenide.baseUrl", "http://localhost:8080");
-        
-        // Remote configuration (if specified)
-        String remoteUrl = getProperty("selenide.remote", "");
-        if (!remoteUrl.isEmpty()) {
-            Configuration.remote = remoteUrl;
-        }
-        
-        // Other configurations
-        Configuration.headless = Boolean.parseBoolean(getProperty("selenide.headless", "false"));
-        Configuration.fastSetValue = Boolean.parseBoolean(getProperty("selenide.fastSetValue", "true"));
-        Configuration.screenshots = Boolean.parseBoolean(getProperty("selenide.screenshots", "true"));
-        Configuration.savePageSource = Boolean.parseBoolean(getProperty("selenide.savePageSource", "true"));
-        Configuration.reportsFolder = getProperty("selenide.reportsFolder", "build/reports/tests");
-        
-        // Project specific URL based on project name if specified
+    private static void handleProjectSpecificUrl() {
         String projectName = getProperty("project.name", "");
         if (!projectName.isEmpty()) {
             String projectSpecificUrl = getProperty("selenide.url." + projectName, "");
             if (!projectSpecificUrl.isEmpty()) {
+                // Set both the system property and Configuration property
+                System.setProperty("selenide.baseUrl", projectSpecificUrl);
                 Configuration.baseUrl = projectSpecificUrl;
+                log.info("Set baseUrl to {} for project {}", projectSpecificUrl, projectName);
             }
         }
     }
-    
+
+    /**
+     * Logs the key configuration values for debugging
+     */
+    private static void logConfiguration() {
+        log.info("Selenide configuration: browser={}, baseUrl={}, remote={}, headless={}",
+                Configuration.browser,
+                Configuration.baseUrl,
+                Configuration.remote,
+                Configuration.headless);
+    }
+
     /**
      * Gets a property value with a default fallback
      *
