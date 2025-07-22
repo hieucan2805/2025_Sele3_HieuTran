@@ -46,7 +46,7 @@ public class VietJetTestcasesDataProvider {
             throw new RuntimeException("No test data found in " + filePath);
         }
 
-        BookingInformationModel tc002Data = bookingData.get(0);
+        BookingInformationModel tc002Data = bookingData.getFirst();
         log.info("Test case 002 data loaded from: {}", filePath);
         return new Object[][]{{tc002Data}};
     }

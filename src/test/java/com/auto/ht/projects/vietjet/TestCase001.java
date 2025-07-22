@@ -8,14 +8,12 @@ import com.auto.ht.projects.vietjet.page.PassengerInfoPage;
 import com.auto.ht.projects.vietjet.page.SelectFlightPage;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.testng.asserts.SoftAssert;
 
 public class TestCase001 extends BaseTest {
 
     private final HomePage homePage = new HomePage();
     private final SelectFlightPage selectFightPage = new SelectFlightPage();
     private final PassengerInfoPage passengerInfoPage = new PassengerInfoPage();
-    private final SoftAssert softAssert = new SoftAssert();
 
     @Test(dataProvider = "testcase001Data", dataProviderClass = VietJetTestcasesDataProvider.class)
     public void vietJetTest(BookingInformationModel info) {
