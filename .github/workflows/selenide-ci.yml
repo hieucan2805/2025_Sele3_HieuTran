@@ -3,8 +3,6 @@ name: Selenide Automation Tests
 env:
   JAVA_VERSION: '21'
   JAVA_DISTRIBUTION: 'temurin'
-  SELENIUM_HUB_PORT: 4444
-  SELENIUM_VERSION: '4.13.0'
 
 on:
   push:
@@ -58,18 +56,78 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: maven
 
-      - name: Setup Selenium Grid
-        if: ${{ github.event.inputs.use_grid != false }}
+      - name: Extract all selenide properties
+        id: selenide_props
         run: |
-          docker-compose up -d
+          # Read and extract browser configuration
+          BROWSER=$(grep -E '^selenide\.browser=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "chrome")
+          HEADLESS=$(grep -E '^selenide\.headless=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "true")
+          PROJECT_NAME=$(grep -E '^selenide\.projectName=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "VjAir")
+          REMOTE_URL=$(grep -E '^selenide\.remote=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "false")
+          HUB_PORT=$(grep -E '^selenide\.remotePort=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "4444")
+          
+          # Read and extract email settings
+          EMAIL_SERVER=$(grep -E '^email\.server=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "smtp.gmail.com")
+          EMAIL_PORT=$(grep -E '^email\.port=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "465")
+          EMAIL_TO=$(grep -E '^email\.to=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "hieucan1991@gmail.com")
+          EMAIL_SUBJECT_PREFIX=$(grep -E '^email\.subject\.prefix=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "[AGEST][SELE3] Test Result")
+          EMAIL_REPORT_PATH=$(grep -E '^email\.report\.path=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "target/allure-report/index.html")
+          
+          # Set outputs for use in later steps
+          echo "browser=$BROWSER" >> $GITHUB_OUTPUT
+          echo "headless=$HEADLESS" >> $GITHUB_OUTPUT
+          echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "remote_url=$REMOTE_URL" >> $GITHUB_OUTPUT
+          echo "hub_port=$HUB_PORT" >> $GITHUB_OUTPUT
+          echo "email_server=$EMAIL_SERVER" >> $GITHUB_OUTPUT
+          echo "email_port=$EMAIL_PORT" >> $GITHUB_OUTPUT
+          echo "email_to=$EMAIL_TO" >> $GITHUB_OUTPUT
+          echo "email_subject_prefix=$EMAIL_SUBJECT_PREFIX" >> $GITHUB_OUTPUT
+          echo "email_report_path=$EMAIL_REPORT_PATH" >> $GITHUB_OUTPUT
+          
+          # Log extracted values
+          echo "Selenide configuration values from properties:"
+          echo "Browser: $BROWSER"
+          echo "Headless: $HEADLESS"
+          echo "Project Name: $PROJECT_NAME"
+          echo "Remote URL: $REMOTE_URL"
+          echo "Hub Port: $HUB_PORT"
+          echo "Email Server: $EMAIL_SERVER"
+          echo "Email Port: $EMAIL_PORT"
+          echo "Email To: $EMAIL_TO"
+          echo "Email Subject Prefix: $EMAIL_SUBJECT_PREFIX"
+          echo "Email Report Path: $EMAIL_REPORT_PATH"
+
+      - name: Setup Selenium Grid
+        if: ${{ github.event.inputs.use_grid == true }}
+        run: |
+          SELENIUM_HUB_PORT=${{ steps.selenide_props.outputs.hub_port }}
+          echo "Setting up Selenium Grid with port: $SELENIUM_HUB_PORT"
+          
+          # Check if docker-compose exists in resources/grid directory (preferred location)
+          if [ -f "src/main/resources/grid/docker-compose.yml" ]; then
+            echo "Found docker-compose.yml in resources/grid directory"
+            cd src/main/resources/grid
+            docker-compose up -d
+          # Fallback to root directory
+          elif [ -f "docker-compose.yml" ]; then
+            echo "Found docker-compose.yml in root directory"
+            docker-compose up -d
+          else
+            echo "Error: docker-compose.yml not found in either src/main/resources/grid or root directory"
+            exit 1
+          fi
+          
+          echo "SELENIUM_REMOTE_URL=http://localhost:${SELENIUM_HUB_PORT}/wd/hub" >> $GITHUB_ENV
 
       - name: Wait for Selenium Grid
-        if: ${{ github.event.inputs.use_grid != false }}
+        if: ${{ github.event.inputs.use_grid == true }}
         run: |
-          echo "Waiting for Selenium Grid to be ready..."
+          SELENIUM_HUB_PORT=${{ steps.selenide_props.outputs.hub_port }}
+          echo "Waiting for Selenium Grid at http://localhost:${SELENIUM_HUB_PORT}/wd/hub/status ..."
           timeout=60
           start_time=$(date +%s)
-          while ! curl -sSL "http://localhost:4444/wd/hub/status" | grep -q "\"ready\":true"; do
+          while ! curl -sSL "http://localhost:${SELENIUM_HUB_PORT}/wd/hub/status" | grep -q "\"ready\":true"; do
             current_time=$(date +%s)
             elapsed=$((current_time - start_time))
             if [ $elapsed -gt $timeout ]; then
@@ -83,33 +141,26 @@ jobs:
 
       - name: Run Tests
         run: |
-          # Determine which browser and project to run based on workflow dispatch inputs or default values
-          BROWSER="${{ github.event.inputs.browser || 'chrome' }}"
-          PROJECT="${{ github.event.inputs.project || 'VjAir' }}"
-          HEADLESS="${{ github.event.inputs.headless }}"
+          # Determine which browser and project to run based on workflow dispatch inputs or properties file
+          BROWSER="${{ github.event.inputs.browser || steps.selenide_props.outputs.browser }}"
+          PROJECT="${{ github.event.inputs.project || steps.selenide_props.outputs.project_name }}"
+          HEADLESS="${{ github.event.inputs.headless || steps.selenide_props.outputs.headless }}"
           USE_GRID="${{ github.event.inputs.use_grid }}"
           
-          # Convert boolean inputs to selenide parameter format
-          if [ "$HEADLESS" = "true" ]; then
-            HEADLESS_PARAM="true"
-          else
-            HEADLESS_PARAM="false"
-          fi
-          
           # Set remote URL based on grid usage preference
-          REMOTE_URL=""
+          REMOTE_URL="false"
           if [ "$USE_GRID" = "true" ]; then
-            REMOTE_URL="http://localhost:4444/wd/hub"
-          else
-            REMOTE_URL="false"
+            HUB_PORT="${{ steps.selenide_props.outputs.hub_port }}"
+            REMOTE_URL="http://localhost:${HUB_PORT}/wd/hub"
           fi
           
           # Run tests with Maven
+          echo "Running tests with browser: $BROWSER, project: $PROJECT, headless: $HEADLESS, remote URL: $REMOTE_URL"
           mvn clean test \
             -Dselenide.browser="$BROWSER" \
             -Dselenide.remote="$REMOTE_URL" \
             -Dselenide.projectName="$PROJECT" \
-            -Dselenide.headless="$HEADLESS_PARAM"
+            -Dselenide.headless="$HEADLESS"
 
       - name: Generate Allure Report
         if: always()
@@ -136,15 +187,15 @@ jobs:
         if: always()               # Both on success and failure
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: smtp.gmail.com
-          server_port: 465
+          server_address: ${{ steps.selenide_props.outputs.email_server }}
+          server_port: ${{ steps.selenide_props.outputs.email_port }}
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          to:       hieucan1991@gmail.com
-          from:     ${{ secrets.MAIL_USERNAME }}
+          to: ${{ steps.selenide_props.outputs.email_to }}
+          from: ${{ secrets.MAIL_USERNAME }}
 
           subject: >
-            [AGEST][SELE3] Test Result – ${{ job.status }} – ${{ steps.get_start_time.outputs.start_time }}
+            ${{ steps.selenide_props.outputs.email_subject_prefix }} – ${{ job.status }} – ${{ steps.get_start_time.outputs.start_time }}
 
           body: |
             Hello,
@@ -152,6 +203,9 @@ jobs:
             Test run has completed.
             
             • Status     : ${{ job.status }}
+            • Browser    : ${{ github.event.inputs.browser || steps.selenide_props.outputs.browser }}
+            • Project    : ${{ github.event.inputs.project || steps.selenide_props.outputs.project_name }}
+            • Headless   : ${{ github.event.inputs.headless || steps.selenide_props.outputs.headless }}
             • Start time : ${{ steps.get_start_time.outputs.start_time }}
             
             See details in the attached report.
@@ -160,5 +214,4 @@ jobs:
             GitHub Actions
 
           attachments: |
-            target/allure-report/index.html
-
+            ${{ steps.selenide_props.outputs.email_report_path }}
