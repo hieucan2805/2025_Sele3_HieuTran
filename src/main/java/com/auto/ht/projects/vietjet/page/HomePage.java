@@ -3,6 +3,7 @@ package com.auto.ht.projects.vietjet.page;
 import com.auto.ht.components.CalendarComponent;
 import com.auto.ht.helpers.DateHelper;
 import com.auto.ht.helpers.LocatorHelper;
+import com.auto.ht.projects.vietjet.enums.FlightType;
 import com.auto.ht.projects.vietjet.models.BookingInformationModel;
 import com.auto.ht.projects.vietjet.models.PassengerModel;
 import com.auto.ht.utils.*;
@@ -11,6 +12,7 @@ import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
@@ -21,6 +23,7 @@ public class HomePage extends BasePage {
     private final LocatorHelper localeBundle = new LocatorHelper(HomePage.class.getSimpleName());
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(HomePage.class);
     private final CalendarComponent calendarComponent = new CalendarComponent();
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final String typeOfFlight = "//span[text()='%s']";
     private final String inputFrom = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id)]";
@@ -37,10 +40,10 @@ public class HomePage extends BasePage {
     private final String labelCheapestFare = "//h3[text()='%s']";
 
     //Actions block
-    @Step("Select the {typeFlight} Flight")
-    public void clickTypeOfFlight(String typeFlight) {
+    @Step("Select the {flightType} Flight")
+    public void clickTypeOfFlight(FlightType flightType) {
         String newXpath;
-        if (typeFlight.equalsIgnoreCase("oneway")) {
+        if (flightType == FlightType.ONE_WAY) {
             newXpath = localeBundle.updateLocatorWithDynamicText(typeOfFlight, "radio.oneWay");
         } else {
             newXpath = localeBundle.updateLocatorWithDynamicText(typeOfFlight, "radio.roundTrip");
@@ -100,7 +103,7 @@ public class HomePage extends BasePage {
         inputPassenger("baby", passenger.getBaby());
     }
 
-    public void inputPassenger(String passenger, String number) {
+    private void inputPassenger(String passenger, int number) {
         String labelXpath = String.format(labelPassenger, passenger);
         String buttonIncreaseXpath = String.format(buttonIncreasePassenger, passenger);
         String buttonDecreaseXpath = String.format(buttonDecreasePassenger, passenger);
@@ -109,8 +112,8 @@ public class HomePage extends BasePage {
         if (!$x(buttonSpecialAssistanceRequest).isDisplayed())
             $x(dropdownPassenger).click();
 
-        while (Integer.parseInt(currentCount) != Integer.parseInt(number)) {
-            if (Integer.parseInt(currentCount) < Integer.parseInt(number)) {
+        while (Integer.parseInt(currentCount) != number) {
+            if (Integer.parseInt(currentCount) < number) {
                 $x(buttonIncreaseXpath).click(); // Click "+" if less
             } else {
                 $x(buttonDecreaseXpath).click(); // Click "-" if more
@@ -140,10 +143,10 @@ public class HomePage extends BasePage {
         clickTypeOfFlight(bookingInformationModel.getType());
 
         selectAirport(bookingInformationModel.getFrom(), bookingInformationModel.getTo());
-        if (bookingInformationModel.getDuration().isEmpty() || bookingInformationModel.getType().equalsIgnoreCase("oneway")) {
-            selectDateInCalendar(bookingInformationModel.getDepartureDate());
+        if (bookingInformationModel.getDuration().isEmpty() || bookingInformationModel.getType() == FlightType.ONE_WAY) {
+            selectDateInCalendar(formatDate(bookingInformationModel.getDepartureDate()));
         } else {
-            selectDepartureDateAndDuration(bookingInformationModel.getDepartureDate(), bookingInformationModel.getDuration());
+            selectDepartureDateAndDuration(formatDate(bookingInformationModel.getDepartureDate()), bookingInformationModel.getDuration());
         }
 
         inputPassenger(bookingInformationModel.getPassenger());
@@ -156,7 +159,7 @@ public class HomePage extends BasePage {
 
         selectAirport(bookingInformationModel.getFrom(), bookingInformationModel.getTo());
 
-        if (bookingInformationModel.getDuration().isEmpty() || bookingInformationModel.getType().equalsIgnoreCase("oneway")) {
+        if (bookingInformationModel.getDuration().isEmpty() || bookingInformationModel.getType() == FlightType.ONE_WAY) {
             selectDateInCalendar(findStartDate(bookingInformationModel.getRange()));
         } else {
             selectDepartureDateAndDuration(findStartDate(bookingInformationModel.getRange()), bookingInformationModel.getDuration()
@@ -171,7 +174,7 @@ public class HomePage extends BasePage {
 
     @Step("Search Flight with information")
     public void searchFlightWithInfo(BookingInformationModel bookingInformationModel) {
-        if (!bookingInformationModel.getDepartureDate().isEmpty()) {
+        if (bookingInformationModel.getDepartureDate() != null) {
             log.info("Searching flight with departure date: {}", bookingInformationModel.getDepartureDate());
             fillFlightInfo(bookingInformationModel);
         } else {
@@ -181,17 +184,29 @@ public class HomePage extends BasePage {
         clickSearch();
     }
 
+    /**
+     * Format a LocalDate to the format required by the calendar component
+     * @param date LocalDate to format
+     * @return Formatted date string
+     */
+    private String formatDate(LocalDate date) {
+        if (date == null) {
+            return "";
+        }
+        return date.format(DATE_FORMATTER);
+    }
+
     public String findStartDate(String range) {
         // Use the new DateHelper method to get the start date from range
         LocalDate startDateOfRange = DateHelper.getDateFromRange(range);
-        return startDateOfRange.toString();
+        return formatDate(startDateOfRange);
     }
 
     public String findEndDate(String range) {
         // Use the new DateHelper method to get the end date from range
         LocalDate startDateOfRange = DateHelper.getDateFromRange(range);
         LocalDate endDateOfRange = DateHelper.getEndDateFromRange(range, startDateOfRange);
-        return endDateOfRange.toString();
+        return formatDate(endDateOfRange);
     }
 
     /**

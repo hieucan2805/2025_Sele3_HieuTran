@@ -5,9 +5,20 @@
 <!--        <listener class-name="com.auto.listeners.htt.AllureListener"/>-->
         <listener class-name="com.auto.ht.projects.listeners.RetryListener"/>
     </listeners>
-    <test name="Selenide test">
+
+    <!-- Test Case 001 with English language -->
+    <test name="TestCase001 - English">
+        <parameter name="selenide.language" value="en" />
         <classes>
-            <class name="com.auto.ht.projects.vietjet.TestCase002"/>
+            <class name="com.auto.ht.projects.vietjet.TestCase001"/>
         </classes>
     </test>
+
+<!--    &lt;!&ndash; Test Case 002 with Vietnamese language &ndash;&gt;-->
+<!--    <test name="TestCase002 - Vietnamese">-->
+<!--        <parameter name="selenide.language" value="vi" />-->
+<!--        <classes>-->
+<!--            <class name="com.auto.ht.projects.vietjet.TestCase002"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 </suite>

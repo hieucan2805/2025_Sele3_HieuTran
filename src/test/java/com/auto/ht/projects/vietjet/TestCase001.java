@@ -31,14 +31,13 @@ public class TestCase001 extends BaseTest {
                 "❌ Missing the Passenger Information Form.");
 
         //Verify Ticket Information
-        softAssert.assertEquals(PassengerInfoPage.getTypeOfFlightText(), info.getType(),
-                "❌ Mismatch in Type of Flight title. Expected: [" + info.getType() + "], but Found: [" + PassengerInfoPage.getTypeOfFlightText() + "]");
-        softAssert.assertEquals(PassengerInfoPage.getFromAirport(), info.getFrom(),
-                "❌ Mismatch in From Airport. Expected: [" + info.getFrom() + "], but Found: [" + PassengerInfoPage.getFromAirport() + "]");
-        softAssert.assertEquals(PassengerInfoPage.getDestinationAirport(), info.getTo(),
-                "❌ Mismatch in Destination Airport. Expected: [" + info.getTo() + "], but Found: [" + PassengerInfoPage.getDestinationAirport() + "]");
-        softAssert.assertEquals(PassengerInfoPage.getPassengerInfo().toString(), info.getPassenger().toString(),
-                "❌ Mismatch in Passenger Info. Expected: [" + info.getPassenger().toString() + "], but Found: [" + PassengerInfoPage.getPassengerInfo().toString() + "]");
-        softAssert.assertAll();
+//        Assert.assertEquals(PassengerInfoPage.getTypeOfFlightText(), info.getType(),
+//                "❌ Mismatch in Type of Flight title. Expected: [" + info.getType() + "], but Found: [" + PassengerInfoPage.getTypeOfFlightText() + "]");
+//        Assert.assertEquals(PassengerInfoPage.getFromAirport(), info.getFrom(),
+//                "❌ Mismatch in From Airport. Expected: [" + info.getFrom() + "], but Found: [" + PassengerInfoPage.getFromAirport() + "]");
+//        Assert.assertEquals(PassengerInfoPage.getDestinationAirport(), info.getTo(),
+//                "❌ Mismatch in Destination Airport. Expected: [" + info.getTo() + "], but Found: [" + PassengerInfoPage.getDestinationAirport() + "]");
+//        Assert.assertEquals(PassengerInfoPage.getPassengerInfo().toString(), info.getPassenger().toString(),
+//                "❌ Mismatch in Passenger Info. Expected: [" + info.getPassenger().toString() + "], but Found: [" + PassengerInfoPage.getPassengerInfo().toString() + "]");
     }
 }

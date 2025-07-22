@@ -8,21 +8,21 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class PassengerModel {
-    private String adults;
-    private String child;
-    private String baby;
+    private int adults;
+    private int child;
+    private int baby;
 
     public PassengerModel() {
-        this.adults = "0";
-        this.child = "0";
-        this.baby = "0";
+        this.adults = 0;
+        this.child = 0;
+        this.baby = 0;
     }
 
     public PassengerModel(String passengerInfo) {
         String[] parts = passengerInfo.split(",");
-        this.adults = parts[0].trim();
-        this.child = parts.length > 1 ? parts[1].trim() : "0";
-        this.baby = parts.length > 2 ? parts[2].trim() : "0";
+        this.adults = Integer.parseInt(parts[0].trim());
+        this.child = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : 0;
+        this.baby = parts.length > 2 ? Integer.parseInt(parts[2].trim()) : 0;
     }
 
     @Override

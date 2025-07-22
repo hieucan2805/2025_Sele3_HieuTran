@@ -1,5 +1,8 @@
 package com.auto.ht.projects.vietjet.models;
 
+import java.time.LocalDate;
+
+import com.auto.ht.projects.vietjet.enums.FlightType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,19 +12,19 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BookingInformationModel {
 
-    private String type;
+    private FlightType type;
     private String from;
     private String to;
-    private String departureDate;
+    private LocalDate departureDate;
     private String duration;
     private String range;
     private PassengerModel passenger;
 
     public BookingInformationModel() {
-        this.type = "RETURN"; // Default type
+        this.type = FlightType.RETURN; // Default type
         this.from = "";
         this.to = "";
-        this.departureDate = "";
+        this.departureDate = null;
         this.duration = "";
         this.range = "";
         this.passenger = new PassengerModel();

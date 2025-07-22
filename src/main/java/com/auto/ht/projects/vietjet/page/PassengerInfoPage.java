@@ -1,6 +1,7 @@
 package com.auto.ht.projects.vietjet.page;
 
 import com.auto.ht.helpers.LocatorHelper;
+import com.auto.ht.projects.vietjet.enums.FlightType;
 import com.auto.ht.projects.vietjet.models.BookingInformationModel;
 import com.auto.ht.projects.vietjet.models.PassengerModel;
 import com.auto.ht.utils.Constants;
@@ -20,9 +21,9 @@ public class PassengerInfoPage extends BasePage {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(PassengerInfoPage.class);
 
     private final String frmPassengerInfoForm = "//i[@class = 'fa fa-male']/ancestor::div[contains(@style,'padding-bottom')]";
-    private static final String labelFrom = "//img[@src='/static/media/departure-icon.25d3557e.svg']//following-sibling::p";
-    private static final String labelDestination = "//img[@src='/static/media/arrival-icon.a05c5d78.svg']//following-sibling::p";
-    private static final String labelTypeAndPassenger = "//img[@src='/static/media/departure-icon.25d3557e.svg']//parent::div//preceding-sibling::p";
+    private final String labelFrom = "//img[@src='/static/media/departure-icon.25d3557e.svg']//following-sibling::p";
+    private final String labelDestination = "//img[@src='/static/media/arrival-icon.a05c5d78.svg']//following-sibling::p";
+    private final String labelTypeAndPassenger = "//img[@src='/static/media/departure-icon.25d3557e.svg']//parent::div//preceding-sibling::p";
 
     //Method
     @Step("Verify Passenger Info Form is displayed")
@@ -31,45 +32,46 @@ public class PassengerInfoPage extends BasePage {
         return $x(frmPassengerInfoForm).shouldBe(visible, Constants.MEDIUM_WAIT).isDisplayed();
     }
 
-    public static String getFromAirport() {
+    public String getFromAirport() {
         log.info("Getting From Airport");
         return extractAirportCode($x(labelFrom).shouldBe(visible, Constants.SHORT_WAIT).getText());
     }
 
     @Step("Verify From Airport")
-    public static boolean verifyFromAirport(String airportCode) {
+    public boolean verifyFromAirport(String airportCode) {
         log.info("Verifying From Airport with code: {}", airportCode);
         return getFromAirport().contains(airportCode);
     }
 
-    public static String getDestinationAirport() {
+    public String getDestinationAirport() {
         log.info("Getting Destination Airport");
         return extractAirportCode($x(labelDestination).shouldBe(visible, Constants.SHORT_WAIT).getText());
     }
 
     @Step("Verify Destination Airport")
-    public static boolean verifyDestinationAirport(String airportName) {
+    public boolean verifyDestinationAirport(String airportName) {
         log.info("Verifying Destination Airport with name: {}", airportName);
         return getDestinationAirport().contains(airportName);
     }
 
-    public static String getTypeOfFlightText() {
+    public FlightType getTypeOfFlight() {
         String tmp_text = $x(labelTypeAndPassenger).shouldBe(visible, Constants.SHORT_WAIT).getText();
-        return (tmp_text.split("\\|")[0].trim()).replaceAll("[^A-Z]", "").toLowerCase().replace("flight", "");
+        String flightTypeStr = (tmp_text.split("\\|")[0].trim()).replaceAll("[^A-Z]", "").toLowerCase().replace("flight", "");
+        return FlightType.fromName(flightTypeStr);
     }
 
     @Step("Verify Type of Flight")
-    public boolean verifyTypeOfFlight(String typeOfFlight) {
-        log.info("Verifying Type of Flight: {}", typeOfFlight);
-        String flightType = getTypeOfFlightText();
-        return flightType.equalsIgnoreCase(typeOfFlight);
+    public boolean verifyTypeOfFlight(FlightType expectedFlightType) {
+        log.info("Verifying Type of Flight: {}", expectedFlightType.getName());
+        FlightType actualFlightType = getTypeOfFlight();
+        return actualFlightType == expectedFlightType;
     }
 
-    public static PassengerModel getPassengerInfo() {
+    public PassengerModel getPassengerInfo() {
         String tmp_text = ($x(labelTypeAndPassenger).shouldBe(visible, Constants.SHORT_WAIT).getText()).split("\\|")[1].trim();
         // Extract passenger information from the text
         if (tmp_text.isEmpty()) {
-            return new PassengerModel("0", "0", "0");
+            return new PassengerModel(1, 0, 0);
         }
         // Remove all alphabet characters and spaces, keeping only digits and commas
         tmp_text = tmp_text.replaceAll("[a-zA-Z\\s]", "");
@@ -80,9 +82,9 @@ public class PassengerInfoPage extends BasePage {
     public boolean verifyPassengerInfo(PassengerModel passengerInfo) {
         log.info("Verifying Passenger Information");
         PassengerModel actualPassengerInfo = getPassengerInfo();
-        return actualPassengerInfo.getAdults().equals(passengerInfo.getAdults()) &&
-                actualPassengerInfo.getChild().equals(passengerInfo.getChild()) &&
-                actualPassengerInfo.getBaby().equals(passengerInfo.getBaby());
+        return actualPassengerInfo.getAdults() == passengerInfo.getAdults() &&
+                actualPassengerInfo.getChild() == passengerInfo.getChild() &&
+                actualPassengerInfo.getBaby() == passengerInfo.getBaby();
     }
 
     @Step("Verify Ticket Information")

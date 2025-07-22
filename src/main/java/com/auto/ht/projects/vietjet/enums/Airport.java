@@ -30,6 +30,6 @@ public enum Airport {
 
     @Override
     public String toString() {
-        return String.format("%s", code);
+        return code;
     }
 }
