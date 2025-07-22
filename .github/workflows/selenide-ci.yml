@@ -171,7 +171,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: target/site/allure-maven-plugin/
+          path: target/allure-report/
+          if-no-files-found: warn
+          compression-level: 6
+          overwrite: false
 
       - name: Upload Test Results
         if: always()
