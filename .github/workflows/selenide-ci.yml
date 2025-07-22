@@ -7,6 +7,10 @@ env:
 on:
   push:
     branches: [ main, master, develop, update-framework-2 ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -37,9 +41,42 @@ on:
         required: false
         default: true
         type: boolean
+      force_run:
+        description: 'Force CI/CD run even if ci.enabled=false'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
+  check-if-ci-enabled:
+    runs-on: ubuntu-latest
+    outputs:
+      ci-enabled: ${{ steps.check-enabled.outputs.enabled }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Check if CI is enabled
+        id: check-enabled
+        run: |
+          CI_ENABLED=$(grep -E '^ci\.enabled=' src/test/resources/selenide.properties | cut -d'=' -f2- || echo "true")
+          FORCE_RUN="${{ github.event.inputs.force_run || 'false' }}"
+          
+          # Set output based on ci.enabled property or force_run input
+          if [ "$CI_ENABLED" = "true" ] || [ "$FORCE_RUN" = "true" ]; then
+            echo "CI is enabled in properties or force run is true"
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          else
+            echo "CI is disabled in properties and force run is false"
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "CI Enabled: $CI_ENABLED"
+          echo "Force Run: $FORCE_RUN"
+
   test:
+    needs: check-if-ci-enabled
+    if: ${{ needs.check-if-ci-enabled.outputs.ci-enabled == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Capture start time
