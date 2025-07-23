@@ -46,6 +46,11 @@ on:
         required: false
         default: false
         type: boolean
+      silent_mode:
+        description: 'Run with minimal console output'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   check-if-ci-enabled:
@@ -121,19 +126,7 @@ jobs:
           echo "email_to=$EMAIL_TO" >> $GITHUB_OUTPUT
           echo "email_subject_prefix=$EMAIL_SUBJECT_PREFIX" >> $GITHUB_OUTPUT
           echo "email_report_path=$EMAIL_REPORT_PATH" >> $GITHUB_OUTPUT
-          
-          # Log extracted values
-          echo "Selenide configuration values from properties:"
-          echo "Browser: $BROWSER"
-          echo "Headless: $HEADLESS"
-          echo "Project Name: $PROJECT_NAME"
-          echo "Remote URL: $REMOTE_URL"
-          echo "Hub Port: $HUB_PORT"
-          echo "Email Server: $EMAIL_SERVER"
-          echo "Email Port: $EMAIL_PORT"
-          echo "Email To: $EMAIL_TO"
-          echo "Email Subject Prefix: $EMAIL_SUBJECT_PREFIX"
-          echo "Email Report Path: $EMAIL_REPORT_PATH"
+        
 
       - name: Setup Selenium Grid
         if: ${{ github.event.inputs.use_grid == true }}
@@ -183,6 +176,7 @@ jobs:
           PROJECT="${{ github.event.inputs.project || steps.selenide_props.outputs.project_name }}"
           HEADLESS="${{ github.event.inputs.headless || steps.selenide_props.outputs.headless }}"
           USE_GRID="${{ github.event.inputs.use_grid }}"
+          SILENT_MODE="${{ github.event.inputs.silent_mode }}"
           
           # Set remote URL based on grid usage preference
           REMOTE_URL="false"
@@ -192,12 +186,30 @@ jobs:
           fi
           
           # Run tests with Maven
+          MAVEN_OPTS=""
+          LOGGING_OPTS=""
+          
+          if [ "$SILENT_MODE" = "true" ]; then
+            echo "Running in silent mode with minimal console output"
+            # Make Maven quieter
+            MAVEN_OPTS="-q"
+            # Reduce logging from SLF4J and Selenide
+            LOGGING_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=warn \
+                          -Dselenide.reports=false \
+                          -Dselenide.collectionsTimeout=5000 \
+                          -Dselenide.timeout=5000 \
+                          -Dselenide.screenshots=false \
+                          -Dselenide.savePageSource=false \
+                          -Dselenide.reopenBrowserOnFail=false"
+          fi
+          
           echo "Running tests with browser: $BROWSER, project: $PROJECT, headless: $HEADLESS, remote URL: $REMOTE_URL"
-          mvn clean test \
+          mvn clean test $MAVEN_OPTS \
             -Dselenide.browser="$BROWSER" \
             -Dselenide.remote="$REMOTE_URL" \
             -Dselenide.projectName="$PROJECT" \
-            -Dselenide.headless="$HEADLESS"
+            -Dselenide.headless="$HEADLESS" \
+            $LOGGING_OPTS
 
       - name: Generate Allure Report
         if: always()
