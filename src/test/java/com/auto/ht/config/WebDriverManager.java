@@ -108,7 +108,7 @@ public class WebDriverManager {
      */
     private ChromeOptions createChromeOptions(boolean isCI) {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--user-data-dir=" + tempUserDataDir);
+//        options.addArguments("--user-data-dir=" + tempUserDataDir);
         
         // Common options for all environments
         options.addArguments("--no-sandbox");

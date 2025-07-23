@@ -6,7 +6,7 @@ env:
 
 on:
   push:
-    branches: [ main, master, develop, update-framework-2 ]
+    branches: [ main, master, develop, update-framework-2, temp ]
     paths-ignore:
       - '**.md'
       - 'docs/**'
