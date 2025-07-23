@@ -22,7 +22,6 @@ import static java.lang.invoke.MethodHandles.lookup;
 @Listeners(TestCleanupListener.class)
 public class BaseTest {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
-    private String tempUserDataDir; // To store user data dir path for cleanup
 
     @BeforeMethod
     public void setup() {
@@ -30,10 +29,7 @@ public class BaseTest {
         String testMethodName = Thread.currentThread().getStackTrace()[2].getMethodName();
 
         // Initialize configuration from properties and set up WebDriver
-        tempUserDataDir = TestConfiguration.initializeConfiguration(
-                getClass().getName(),
-                testMethodName
-        );
+        TestConfiguration.initializeConfiguration(getClass().getName(), testMethodName);
 
         // Setup Allure reporting
         SelenideLogger.addListener("AllureSelenide", new AllureSelenide().screenshots(true).savePageSource(true));

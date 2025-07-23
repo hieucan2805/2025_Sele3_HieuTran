@@ -10,10 +10,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.UUID;
 import static java.lang.invoke.MethodHandles.lookup;
 
 /**
@@ -21,14 +17,11 @@ import static java.lang.invoke.MethodHandles.lookup;
  */
 public class WebDriverManager {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
-    private String tempUserDataDir; // To store user data dir path for cleanup
-    
+
     /**
      * Configures the WebDriver based on properties
-     * 
-     * @return The path to any temporary directory created, for cleanup
      */
-    public String configureWebDriver() {
+    public void configureWebDriver() {
         // Use Selenide's Configuration.remote directly
         String remoteUrl = Configuration.remote;
 
@@ -44,8 +37,6 @@ public class WebDriverManager {
             // Configure browser options using the general method
             configureBrowserForLocalExecution(Configuration.browser.toLowerCase());
         }
-
-        return tempUserDataDir;
     }
 
     /**
@@ -54,9 +45,6 @@ public class WebDriverManager {
      * @param browserName The name of the browser (chrome, edge, firefox, etc.)
      */
     private void configureBrowserForLocalExecution(String browserName) {
-        // Create a unique user data directory for this test run
-        createTempUserDataDir(browserName);
-
         // Get browser-specific options
         MutableCapabilities options = createBrowserOptions(browserName);
 
@@ -108,8 +96,7 @@ public class WebDriverManager {
      */
     private ChromeOptions createChromeOptions(boolean isCI) {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--user-data-dir=" + tempUserDataDir);
-        
+
         // Common options for all environments
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
@@ -136,7 +123,6 @@ public class WebDriverManager {
      */
     private EdgeOptions createEdgeOptions(boolean isCI) {
         EdgeOptions options = new EdgeOptions();
-        options.addArguments("--user-data-dir=" + tempUserDataDir);
 
         // Common options for all environments
         options.addArguments("--no-sandbox");
@@ -174,48 +160,12 @@ public class WebDriverManager {
 
         options.setProfile(profile);
 
-        // Firefox doesn't use user-data-dir argument like Chrome/Edge
-        // Instead we set a custom profile which is already created in tempUserDataDir
-
         // CI-specific options
         if (isCI) {
             options.addArguments("-headless");
         }
 
         return options;
-    }
-
-    /**
-     * Creates a unique temporary directory for browser user data
-     *
-     * @param browserName The name of the browser (chrome, edge, firefox)
-     */
-    private void createTempUserDataDir(String browserName) {
-        String uniqueId = UUID.randomUUID().toString();
-        String timestamp = String.valueOf(System.currentTimeMillis());
-
-        // In CI environments, ensure we use a completely unique path
-        boolean isCI = System.getenv("CI") != null || System.getenv("GITHUB_ACTIONS") != null;
-
-        // Always create a unique directory path, even for CI
-        if (isCI) {
-            // For CI, use a path in the workspace that's guaranteed to be unique and writable
-            tempUserDataDir = Paths.get(System.getProperty("user.dir"), browserName + "_profile_" + uniqueId + "_" + timestamp).toString();
-            log.info("CI environment detected, using workspace {} profile path: {}", browserName, tempUserDataDir);
-        } else {
-            // For local execution, use the temp directory
-            tempUserDataDir = Paths.get(System.getProperty("java.io.tmpdir"), browserName + "_profile_" + uniqueId + "_" + timestamp).toString();
-        }
-
-        log.info("Setting up {} with unique profile directory: {}", browserName, tempUserDataDir);
-
-        // Create the directory if it doesn't exist
-        try {
-            Files.createDirectories(Paths.get(tempUserDataDir));
-            log.info("Successfully created {} user data directory: {}", browserName, tempUserDataDir);
-        } catch (IOException e) {
-            log.error("Failed to create user data directory for {}: {}", browserName, e.getMessage());
-        }
     }
 
 //    /**

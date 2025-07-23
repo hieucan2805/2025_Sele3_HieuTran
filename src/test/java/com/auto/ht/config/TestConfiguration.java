@@ -25,26 +25,15 @@ public class TestConfiguration {
      *
      * @param testClassName The name of the test class
      * @param testMethodName The name of the test method
-     * @return The path to any temporary directory created, for cleanup
      */
-    public static String initializeConfiguration(String testClassName, String testMethodName) {
+    public static void initializeConfiguration(String testClassName, String testMethodName) {
         // Load properties and configure Selenide
         loadProperties();
         handleProjectSpecificUrl();
         logConfiguration();
 
         // Configure WebDriver based on settings
-        String tempUserDataDir = webDriverManager.configureWebDriver();
-
-        // Register the temp directory with the listener for cleanup
-        if (tempUserDataDir != null && !tempUserDataDir.isEmpty()) {
-            TestCleanupListener.registerTempDirectory(
-                testClassName + "." + testMethodName,
-                tempUserDataDir
-            );
-        }
-
-        return tempUserDataDir;
+        webDriverManager.configureWebDriver();
     }
     
     /**
