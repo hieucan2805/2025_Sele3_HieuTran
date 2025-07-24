@@ -1,6 +1,6 @@
 package com.auto.ht.base;
 
-import com.auto.ht.config.TestCleanupListener;
+//import com.auto.ht.config.TestCleanupListener;
 import com.auto.ht.config.TestConfiguration;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
 
 import static com.codeborne.selenide.Selenide.getUserAgent;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
@@ -19,7 +18,7 @@ import static com.codeborne.selenide.WebDriverRunner.isHeadless;
 import static com.github.automatedowl.tools.AllureEnvironmentWriter.allureEnvironmentWriter;
 import static java.lang.invoke.MethodHandles.lookup;
 
-@Listeners(TestCleanupListener.class)
+//@Listeners(TestCleanupListener.class)
 public class BaseTest {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
 
