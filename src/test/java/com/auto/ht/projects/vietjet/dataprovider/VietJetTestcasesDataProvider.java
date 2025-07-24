@@ -8,6 +8,7 @@ import org.testng.annotations.DataProvider;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class VietJetTestcasesDataProvider {
             throw new RuntimeException("No test data found in " + filePath);
         }
 
-        BookingInformationModel tc002Data = bookingData.getFirst();
+        BookingInformationModel tc002Data = bookingData.get(0);
         log.info("Test case 002 data loaded from: {}", filePath);
         return new Object[][]{{tc002Data}};
     }
@@ -72,10 +73,10 @@ public class VietJetTestcasesDataProvider {
             if (departureDateStr.isEmpty()) {
                 booking.setDepartureDate(null);
             } else {
-                booking.setDepartureDate(LocalDate.parse(departureDateStr, DATE_FORMATTER));
+                booking.setDepartureDate(parseDateString(departureDateStr));
             }
             
-            booking.setDuration(row.getOrDefault("Duration", "today"));
+            booking.setDuration(row.getOrDefault("Duration", "0").isEmpty() ? 0 : Integer.parseInt(row.get("Duration")));
             booking.setRange(row.getOrDefault("Range", ""));
             PassengerModel passenger = new PassengerModel();
             passenger.setAdults(Integer.parseInt(row.getOrDefault("Adults", "1")));
@@ -87,5 +88,39 @@ public class VietJetTestcasesDataProvider {
         }
 
         return bookings;
+    }
+
+    /**
+     * Parses date string with support for special keywords like 'today', 'tomorrow'
+     *
+     * @param dateStr The date string to parse
+     * @return The parsed LocalDate
+     */
+    private static LocalDate parseDateString(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            return null;
+        }
+
+        // Handle special date keywords
+        switch (dateStr.toLowerCase().trim()) {
+            case "today":
+                return LocalDate.now();
+            case "tomorrow":
+                return LocalDate.now().plusDays(1);
+            case "yesterday":
+                return LocalDate.now().minusDays(1);
+            case "next_week":
+                return LocalDate.now().plusWeeks(1);
+            case "next_month":
+                return LocalDate.now().plusMonths(1);
+            default:
+                // Try parsing as a standard date format
+                try {
+                    return LocalDate.parse(dateStr, DATE_FORMATTER);
+                } catch (DateTimeParseException e) {
+                    log.error("Failed to parse date '{}': {}", dateStr, e.getMessage());
+                    throw new RuntimeException("Invalid date format: " + dateStr + ". Expected format dd/MM/yyyy or special keywords like 'today', 'tomorrow'", e);
+                }
+        }
     }
 }

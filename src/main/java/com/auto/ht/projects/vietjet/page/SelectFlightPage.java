@@ -37,7 +37,7 @@ public class SelectFlightPage extends BasePage {
     private final String buttonPreviousMonth = "//button[@aria-label='Next month']";
 
     //Action
-    public ElementsCollection getAllElementsCollectionFlightPrices() {
+    protected ElementsCollection getAllElementsCollectionFlightPrices() {
         scrollToBottomPage();
         return $$x(listPriceOfFlights);
     }
@@ -48,9 +48,7 @@ public class SelectFlightPage extends BasePage {
      * @return List of prices as strings
      */
     public List<String> getAllFlightPrices() {
-        return getAllElementsCollectionFlightPrices().stream()
-                .map(SelenideElement::getText)
-                .collect(Collectors.toList());
+        return getAllElementsCollectionFlightPrices().stream().map(SelenideElement::getText).collect(Collectors.toList());
     }
 
     /**
@@ -59,10 +57,8 @@ public class SelectFlightPage extends BasePage {
      * @return List of prices as integers
      */
     public List<Integer> getAllFlightPricesAsNumbers() {
-        return getAllFlightPrices().stream()
-                .map(price -> price.replaceAll("[^\\d]", "")) // Remove non-numeric chars
-                .map(Integer::parseInt)
-                .collect(Collectors.toList());
+        return getAllFlightPrices().stream().map(price -> price.replaceAll("[^\\d]", "")) // Remove non-numeric chars
+                .map(Integer::parseInt).collect(Collectors.toList());
     }
 
     @Step("Wait until loading icon disappears")
@@ -193,9 +189,7 @@ public class SelectFlightPage extends BasePage {
      * @return Minimum price found
      */
     public int getLowestPrice() {
-        return getAllFlightPricesAsNumbers().stream()
-                .min(Integer::compareTo)
-                .orElseThrow(() -> new IllegalStateException("No prices found"));
+        return getAllFlightPricesAsNumbers().stream().min(Integer::compareTo).orElseThrow(() -> new IllegalStateException("No prices found"));
     }
 
     /**
@@ -204,9 +198,7 @@ public class SelectFlightPage extends BasePage {
      * @return Maximum price found
      */
     public int getHighestPrice() {
-        return getAllFlightPricesAsNumbers().stream()
-                .max(Integer::compareTo)
-                .orElseThrow(() -> new IllegalStateException("No prices found"));
+        return getAllFlightPricesAsNumbers().stream().max(Integer::compareTo).orElseThrow(() -> new IllegalStateException("No prices found"));
     }
 
     public String getTypeOfFlightText() {
@@ -236,9 +228,7 @@ public class SelectFlightPage extends BasePage {
 
     public List<String> getFlightPricesInCurrentMonth() {
         String newXpath = localeBundle.updateLocatorWithDynamicText(listLPriceOfFlightIn, "text.DepartureFlight");
-        return $$x(newXpath).filter(visible).stream()
-                .map(SelenideElement::getText)
-                .collect(Collectors.toList());
+        return $$x(newXpath).filter(visible).stream().map(SelenideElement::getText).collect(Collectors.toList());
     }
 
 }

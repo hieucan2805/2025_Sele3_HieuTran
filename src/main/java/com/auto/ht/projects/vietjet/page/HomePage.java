@@ -76,7 +76,7 @@ public class HomePage extends BasePage {
     }
 
     @Step("Select {date} in Calendar")
-    public void selectDateInCalendar(String date) {
+    public void selectDateInCalendar(LocalDate date) {
         calendarComponent.selectDate(date);
     }
 
@@ -88,11 +88,11 @@ public class HomePage extends BasePage {
         calendarComponent.openReturnDateCalendar();
     }
 
-    public void selectDepartureDateAndReturnDate(String deptDate, String returnDate) {
+    public void selectDepartureDateAndReturnDate(LocalDate deptDate, LocalDate returnDate) {
         calendarComponent.selectDepartureAndReturnDates(deptDate, returnDate);
     }
 
-    public void selectDepartureDateAndDuration(String deptDate, String duration) {
+    public void selectDepartureDateAndDuration(LocalDate deptDate, int duration) {
         calendarComponent.selectDepartureAndDuration(deptDate, duration);
     }
 
@@ -130,7 +130,7 @@ public class HomePage extends BasePage {
     }
 
     public void clickCheapestFlightCheckbox() {
-       String newXpath = localeBundle.updateLocatorWithDynamicText(labelCheapestFare, "text.cheapestFare");
+        String newXpath = localeBundle.updateLocatorWithDynamicText(labelCheapestFare, "text.cheapestFare");
         $x(newXpath).shouldBe(visible, Constants.SHORT_WAIT).click();
     }
 
@@ -143,10 +143,10 @@ public class HomePage extends BasePage {
         clickTypeOfFlight(bookingInformationModel.getType());
 
         selectAirport(bookingInformationModel.getFrom(), bookingInformationModel.getTo());
-        if (bookingInformationModel.getDuration().isEmpty() || bookingInformationModel.getType() == FlightType.ONE_WAY) {
-            selectDateInCalendar(formatDate(bookingInformationModel.getDepartureDate()));
+        if (bookingInformationModel.getDuration() == 0 || bookingInformationModel.getType() == FlightType.ONE_WAY) {
+            selectDateInCalendar(bookingInformationModel.getDepartureDate());
         } else {
-            selectDepartureDateAndDuration(formatDate(bookingInformationModel.getDepartureDate()), bookingInformationModel.getDuration());
+            selectDepartureDateAndDuration(bookingInformationModel.getDepartureDate(), bookingInformationModel.getDuration());
         }
 
         inputPassenger(bookingInformationModel.getPassenger());
@@ -159,7 +159,7 @@ public class HomePage extends BasePage {
 
         selectAirport(bookingInformationModel.getFrom(), bookingInformationModel.getTo());
 
-        if (bookingInformationModel.getDuration().isEmpty() || bookingInformationModel.getType() == FlightType.ONE_WAY) {
+        if (bookingInformationModel.getDuration() == 0 || bookingInformationModel.getType() == FlightType.ONE_WAY) {
             selectDateInCalendar(findStartDate(bookingInformationModel.getRange()));
         } else {
             selectDepartureDateAndDuration(findStartDate(bookingInformationModel.getRange()), bookingInformationModel.getDuration()
@@ -186,6 +186,7 @@ public class HomePage extends BasePage {
 
     /**
      * Format a LocalDate to the format required by the calendar component
+     *
      * @param date LocalDate to format
      * @return Formatted date string
      */
@@ -196,10 +197,9 @@ public class HomePage extends BasePage {
         return date.format(DATE_FORMATTER);
     }
 
-    public String findStartDate(String range) {
+    public LocalDate findStartDate(String range) {
         // Use the new DateHelper method to get the start date from range
-        LocalDate startDateOfRange = DateHelper.getDateFromRange(range);
-        return formatDate(startDateOfRange);
+        return DateHelper.getDateFromRange(range);
     }
 
     public String findEndDate(String range) {

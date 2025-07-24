@@ -16,7 +16,7 @@ public class BookingInformationModel {
     private String from;
     private String to;
     private LocalDate departureDate;
-    private String duration;
+    private int duration;
     private String range;
     private PassengerModel passenger;
 
@@ -25,7 +25,7 @@ public class BookingInformationModel {
         this.from = "";
         this.to = "";
         this.departureDate = null;
-        this.duration = "";
+        this.duration = 0;
         this.range = "";
         this.passenger = new PassengerModel();
     }

@@ -1,5 +1,8 @@
 package com.auto.ht.helpers;
 
+import com.auto.ht.utils.Constants;
+
+import java.lang.module.Configuration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -91,19 +94,6 @@ public class DateHelper {
             throw new IllegalArgumentException("Date cannot be null");
         }
         return date.getMonth().getDisplayName(style, Locale.ENGLISH);
-    }
-
-    /**
-     * Get a date that is a certain number of days after another date.
-     *
-     * @param startDate The starting date string or keyword
-     * @param days The number of days to add
-     * @return The formatted date string for the future date
-     */
-    public static String addDaysToDate(String startDate, String days) {
-        LocalDate date = parseDate(startDate);
-        LocalDate futureDate = date.plusDays(Long.parseLong(days));
-        return formatDate(futureDate, "d MMMM yyyy");
     }
 
     /**

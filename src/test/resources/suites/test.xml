@@ -6,9 +6,8 @@
         <listener class-name="com.auto.ht.projects.listeners.RetryListener"/>
     </listeners>
 
-    <!-- Test Case 001 with English language -->
+     Test Case 001 with English language
     <test name="TestCase001 - English">
-        <parameter name="selenide.language" value="en" />
         <classes>
             <class name="com.auto.ht.projects.vietjet.TestCase001"/>
         </classes>

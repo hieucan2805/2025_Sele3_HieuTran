@@ -3,12 +3,16 @@ package com.auto.ht.components;
 import com.auto.ht.helpers.DateHelper;
 import com.auto.ht.utils.Constants;
 import io.qameta.allure.Step;
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.LocalDate;
-import java.util.concurrent.ThreadLocalRandom;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$x;
 
+@Slf4j
 public class CalendarComponent {
     // Calendar locators
     private final String panelCalendar = "//div[contains(@class,'rdrCalendarWrapper')]";
@@ -77,28 +81,58 @@ public class CalendarComponent {
      * @param date Date to select in format supported by DateHelper.formatDateForCalendar
      */
     @Step("Select {date} in Calendar")
-    public void selectDate(String date) {
-        String[] dateParts = DateHelper.formatDateForCalendar(date);
-        String targetDate = dateParts[0];
-        String targetMonth = dateParts[1];
-        String dateTmpXpath = String.format(labelDateInCalendar, targetMonth, targetDate);
+    public void selectDate(LocalDate date) {
+        // Validate that the date is not in the past
+        LocalDate today = LocalDate.now();
+        if (date.isBefore(today)) {
+            log.warn("Cannot select a date in the past: {}. Using today's date instead.", date);
+            date = today; // Use today's date if the requested date is in the past
+        }
+
+        // Format date using the localized formatter
+        String formattedDate = date.format(getLocalizedDateFormatter());
+        log.info("Selecting date: {} (formatted as: {})", date, formattedDate);
+
+        // Parse formatted date components for XPath
+        String targetDate = formattedDate.split(",")[0].trim();
+        String targetMonthAndYear = formattedDate.split(",")[1].trim();
+
+        String dateTmpXpath = String.format(labelDateInCalendar, targetMonthAndYear, targetDate);
+        log.debug("Using XPath: {}", dateTmpXpath);
 
         // Ensure calendar is open
-        if (!$x(panelCalendar).shouldHave(visible, Constants.VERY_SHORT_WAIT).isDisplayed()) {
+        if (!$x(panelCalendar).is(visible)) {
             $x(buttonReturnDate).click();
         }
 
-        navigateToMonth(targetMonth);
-        $x(dateTmpXpath).click();
+        navigateToMonth(targetMonthAndYear);
+
+        // Check if the date element exists and is clickable
+        if (!$x(dateTmpXpath).exists()) {
+            log.warn("Date element not found. This might be because the date is not available for selection.");
+            // Try alternative XPath if the first one fails
+            String alternativeXPath = String.format(buttonDateAtCalendar, targetMonthAndYear, targetDate);
+            log.info("Trying alternative XPath: {}", alternativeXPath);
+            $x(alternativeXPath).click();
+        } else {
+            $x(dateTmpXpath).click();
+        }
     }
 
     /**
-     * Selects both departure and return dates
+     * Selects both departure and return dates with validation
      * @param departureDate Departure date
      * @param returnDate Return date
      */
     @Step("Select departure date {departureDate} and return date {returnDate}")
-    public void selectDepartureAndReturnDates(String departureDate, String returnDate) {
+    public void selectDepartureAndReturnDates(LocalDate departureDate, LocalDate returnDate) {
+        // Ensure return date is not before departure date
+        if (returnDate.isBefore(departureDate)) {
+            log.warn("Return date {} is before departure date {}. Adjusting return date.",
+                    returnDate, departureDate);
+            returnDate = departureDate.plusDays(1); // Default to next day if invalid
+        }
+
         selectDate(departureDate);
         selectDate(returnDate);
     }
@@ -109,14 +143,20 @@ public class CalendarComponent {
      * @param durationDays Number of days to add for the return date
      */
     @Step("Select departure date {departureDate} with duration of {durationDays} days")
-    public void selectDepartureAndDuration(String departureDate, String durationDays) {
+    public void selectDepartureAndDuration(LocalDate departureDate, int durationDays) {
+        // Validate duration
+        if (durationDays <= 0) {
+            log.warn("Invalid duration: {}. Using 1 day instead.", durationDays);
+            durationDays = 1; // Minimum 1 day duration
+        }
+
         selectDate(departureDate);
 
         // Calculate return date based on departure date + duration
-        String returnDateStr = DateHelper.addDaysToDate(departureDate, durationDays);
+        LocalDate returnDate = departureDate.plusDays(durationDays);
 
         // Select the return date
-        selectDate(returnDateStr);
+        selectDate(returnDate);
     }
 
     /**
@@ -127,5 +167,22 @@ public class CalendarComponent {
         return $x(panelCalendar).isDisplayed();
     }
 
+    /**
+     * Gets the appropriate DateTimeFormatter based on the current language setting
+     * @return DateTimeFormatter configured for the current language
+     */
+    private DateTimeFormatter getLocalizedDateFormatter() {
+        String language = System.getProperty("selenide.language", "en");
 
+        // Create proper locale based on language
+        Locale locale;
+        switch (language.toLowerCase()) {
+            case "vi" -> locale = new Locale("vi", "VN");  // Vietnamese (Vietnam)
+            case "en" -> locale = Locale.ENGLISH;          // English
+            default -> locale = Locale.ENGLISH;            // Default to English
+        }
+
+        // Use a consistent pattern but let the Locale handle the month names and formatting
+        return DateTimeFormatter.ofPattern(Constants.TIME_FORMAT_CURRENT_DATE).withLocale(locale);
+    }
 }
