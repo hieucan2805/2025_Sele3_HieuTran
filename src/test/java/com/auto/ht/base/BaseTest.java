@@ -1,6 +1,5 @@
 package com.auto.ht.base;
 
-//import com.auto.ht.config.TestCleanupListener;
 import com.auto.ht.config.TestConfiguration;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;

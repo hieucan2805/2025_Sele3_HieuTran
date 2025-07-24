@@ -25,6 +25,12 @@ public class WebDriverManager {
         // Use Selenide's Configuration.remote directly
         String remoteUrl = Configuration.remote;
 
+        // Check if the specified browser is available
+        if (!isBrowserAvailable(Configuration.browser.toLowerCase())) {
+            log.warn("Browser '{}' is not available on this system. Falling back to Chrome.", Configuration.browser);
+            Configuration.browser = "chrome";
+        }
+
         // Configure Selenide to use Selenium Grid if remoteUrl is provided
         if (remoteUrl != null && !remoteUrl.isEmpty() && !remoteUrl.equalsIgnoreCase("false")) {
             log.info("Setting up Grid execution with browser: {}, remoteUrl: {}", Configuration.browser, remoteUrl);
@@ -37,6 +43,33 @@ public class WebDriverManager {
             // Configure browser options using the general method
             configureBrowserForLocalExecution(Configuration.browser.toLowerCase());
         }
+    }
+
+    /**
+     * Checks if the specified browser is available on the system
+     * @param browserName Browser name to check
+     * @return true if the browser is available, false otherwise
+     */
+    private boolean isBrowserAvailable(String browserName) {
+        // Default paths for common browsers on Linux
+        String binaryPath = switch (browserName) {
+            case "chrome" -> "/usr/bin/google-chrome";
+            case "firefox" -> "/usr/bin/firefox";
+            case "edge" -> "/usr/bin/msedge";
+            default -> null;
+        };
+
+        if (binaryPath == null) {
+            return false;
+        }
+
+        // Check if the binary exists
+        boolean available = new java.io.File(binaryPath).exists();
+        if (!available) {
+            log.warn("Browser binary not found at expected path: {}", binaryPath);
+        }
+
+        return available;
     }
 
     /**
@@ -151,6 +184,9 @@ public class WebDriverManager {
         FirefoxOptions options = new FirefoxOptions();
         FirefoxProfile profile = new FirefoxProfile();
 
+        // Explicitly set Firefox binary path
+        options.setBinary("/usr/bin/firefox");
+
         // Configure Firefox profile preferences
         profile.setPreference("browser.cache.disk.enable", false);
         profile.setPreference("browser.cache.memory.enable", false);
@@ -165,6 +201,7 @@ public class WebDriverManager {
             options.addArguments("-headless");
         }
 
+        log.info("Configured Firefox with binary path: /usr/bin/firefox");
         return options;
     }
 
