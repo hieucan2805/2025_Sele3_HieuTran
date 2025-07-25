@@ -22,7 +22,6 @@ public class HomePage extends BasePage {
     @Getter
     private final LocatorHelper localeBundle = new LocatorHelper(HomePage.class.getSimpleName());
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(HomePage.class);
-    private final CalendarComponent calendarComponent = new CalendarComponent();
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final String typeOfFlight = "//span[text()='%s']";
@@ -38,6 +37,8 @@ public class HomePage extends BasePage {
     private final String buttonSpecialAssistanceRequest = "//span[@customcolor='hint']";
     private final String buttonSearchFlight = "//button[@tabindex='0']//span[text()]/parent::button";
     private final String labelCheapestFare = "//h3[text()='%s']";
+
+    private final CalendarComponent calendarComponent = new CalendarComponent(buttonDepartureDate,buttonReturnDate);
 
     //Actions block
     @Step("Select the {flightType} Flight")

@@ -40,6 +40,24 @@ public class LanguageHelper {
         }
     }
 
+    /**
+     * Get the Locale object for the configured language
+     * @return Locale object for the current language setting
+     */
+    public static Locale getLocale() {
+        String languageCode = LazyPropertiesHelper.getProperty(Constants.PROPERTIES_FILE, "selenide.language", "en");
+
+        // Create proper locale based on language code
+        return switch (languageCode.toLowerCase()) {
+            case "vi" -> new Locale("vi", "VN");  // Vietnamese (Vietnam)
+            case "en" -> Locale.ENGLISH;          // English
+            default -> {
+                log.warn("Unknown language code: {}. Defaulting to English.", languageCode);
+                yield Locale.ENGLISH;             // Default to English
+            }
+        };
+    }
+
     public static String getTestSuite() {
         return System.getProperty("test.suite", "vietjet").toLowerCase();
     }

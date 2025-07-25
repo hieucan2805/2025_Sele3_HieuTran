@@ -131,26 +131,13 @@ public class DateHelper {
         String rangeUnit = rangeParts[rangeParts.length - 1].toLowerCase();
         int rangeValue = Integer.parseInt(rangeParts[1]);
         LocalDate today = LocalDate.now();
-        LocalDate startDateOfRange;
 
-        switch (rangeUnit) {
-            case "day":
-            case "days":
-                startDateOfRange = today.plusDays(1);
-                break;
-            case "week":
-            case "weeks":
-                startDateOfRange = today.plusWeeks(1).with(java.time.DayOfWeek.MONDAY);
-                break;
-            case "month":
-            case "months":
-                startDateOfRange = today.plusMonths(1).withDayOfMonth(1);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported range unit: " + rangeUnit);
-        }
-
-        return startDateOfRange;
+        return switch (rangeUnit) {
+            case "day", "days" -> today.plusDays(1);
+            case "week", "weeks" -> today.plusWeeks(1).with(java.time.DayOfWeek.MONDAY);
+            case "month", "months" -> today.plusMonths(1).withDayOfMonth(1);
+            default -> throw new IllegalArgumentException("Unsupported range unit: " + rangeUnit);
+        };
     }
 
     /**

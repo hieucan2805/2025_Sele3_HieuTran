@@ -83,8 +83,9 @@ public class SelectFlightPage extends BasePage {
     public void selectLowestPriceTicket() {
         try {
             waitLoadingIconDisappear();
-            // First try to close any notification frames or overlays
-            iFrameHelper.handleInterceptingFrames();
+            // Instead of using the old handleInterceptingFrames method,
+            // we directly interact with elements in the main document
+            // as we no longer try to generically handle frames
 
             ElementsCollection priceElements = getAllElementsCollectionFlightPrices();
             int minPrice = Integer.MAX_VALUE;
@@ -103,7 +104,8 @@ public class SelectFlightPage extends BasePage {
             }
 
             if (cheapestElement != null) {
-                iFrameHelper.safeClick(cheapestElement);
+                // Use direct click instead of safeClick
+                cheapestElement.click();
                 log.info("Clicked on the lowest price: {}", minPrice);
             } else {
                 throw new IllegalStateException("No valid prices found to click.");

@@ -1,6 +1,7 @@
 package com.auto.ht.components;
 
 import com.auto.ht.helpers.DateHelper;
+import com.auto.ht.helpers.LanguageHelper;
 import com.auto.ht.utils.Constants;
 import io.qameta.allure.Step;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import static com.codeborne.selenide.Selenide.$x;
 
 @Slf4j
 public class CalendarComponent {
+    Locale locale = LanguageHelper.getLocale();
+
     // Calendar locators
     private final String panelCalendar = "//div[contains(@class,'rdrCalendarWrapper')]";
     private final String labelMonthInCalendar = "//div[@class='rdrMonthName']";
@@ -21,6 +24,8 @@ public class CalendarComponent {
     private final String buttonNextMonth = "//button[@class='rdrNextPrevButton rdrNextButton']";
     private final String labelDateInCalendar = "//div[text()='%s']//following-sibling::div[@class='rdrDays']//span[text()='%s']";
     private final String buttonDateAtCalendar = "//div[@class='rdrMonth' and contains(div,'%s')]//span[text()='%s']";
+
+    // Default locators for date buttons
 
     // Customizable trigger buttons
     private String buttonDepartureDate;
@@ -34,14 +39,6 @@ public class CalendarComponent {
     public CalendarComponent(String departureDateButtonLocator, String returnDateButtonLocator) {
         this.buttonDepartureDate = departureDateButtonLocator;
         this.buttonReturnDate = returnDateButtonLocator;
-    }
-
-    /**
-     * Default constructor with default locators
-     */
-    public CalendarComponent() {
-        this.buttonDepartureDate = "//input[@class='MuiInputBase-input MuiOutlinedInput-input' and not(@id='arrivalPlaceDesktop')]//ancestor::div[.//div[@role='button']]/div[@role='button']";
-        this.buttonReturnDate = "//img[@src='/static/media/switch.d8860013.svg']/following-sibling::div/following-sibling::div//p";
     }
 
     /**
@@ -89,13 +86,11 @@ public class CalendarComponent {
             date = today; // Use today's date if the requested date is in the past
         }
 
-        // Format date using the localized formatter
-        String formattedDate = date.format(getLocalizedDateFormatter());
-        log.info("Selecting date: {} (formatted as: {})", date, formattedDate);
+        // Format day and month/year separately to avoid issues with split
+        String targetDate = date.format(DateTimeFormatter.ofPattern("d").withLocale(locale));
+        String targetMonthAndYear = date.format(DateTimeFormatter.ofPattern("MMMM yyyy").withLocale(locale));
 
-        // Parse formatted date components for XPath
-        String targetDate = formattedDate.split(",")[0].trim();
-        String targetMonthAndYear = formattedDate.split(",")[1].trim();
+        log.info("Selecting date: {} (day: {}, month/year: {})", date, targetDate, targetMonthAndYear);
 
         String dateTmpXpath = String.format(labelDateInCalendar, targetMonthAndYear, targetDate);
         log.debug("Using XPath: {}", dateTmpXpath);
