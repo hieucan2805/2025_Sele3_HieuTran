@@ -1,6 +1,5 @@
 package com.auto.ht.components;
 
-import com.auto.ht.helpers.DateHelper;
 import com.auto.ht.helpers.LanguageHelper;
 import com.auto.ht.utils.Constants;
 import io.qameta.allure.Step;
@@ -15,14 +14,13 @@ import static com.codeborne.selenide.Selenide.$x;
 
 @Slf4j
 public class CalendarComponent {
-    Locale locale = LanguageHelper.getLocale();
 
     // Calendar locators
     private final String panelCalendar = "//div[contains(@class,'rdrCalendarWrapper')]";
     private final String labelMonthInCalendar = "//div[@class='rdrMonthName']";
     private final String buttonPrevMonth = "//button[@class='rdrNextPrevButton rdrPprevButton']";
     private final String buttonNextMonth = "//button[@class='rdrNextPrevButton rdrNextButton']";
-    private final String labelDateInCalendar = "//div[text()='%s']//following-sibling::div[@class='rdrDays']//span[text()='%s']";
+    private final String labelDateInCalendar = "//div[@class='rdrMonthName' and text()='%s']//following-sibling::div[@class='rdrDays']//span[text()='%s']";
     private final String buttonDateAtCalendar = "//div[@class='rdrMonth' and contains(div,'%s')]//span[text()='%s']";
 
     // Default locators for date buttons
@@ -33,8 +31,9 @@ public class CalendarComponent {
 
     /**
      * Constructor with custom trigger button locators
+     *
      * @param departureDateButtonLocator XPath locator for the departure date button
-     * @param returnDateButtonLocator XPath locator for the return date button
+     * @param returnDateButtonLocator    XPath locator for the return date button
      */
     public CalendarComponent(String departureDateButtonLocator, String returnDateButtonLocator) {
         this.buttonDepartureDate = departureDateButtonLocator;
@@ -61,6 +60,7 @@ public class CalendarComponent {
 
     /**
      * Navigates to the specified month in the calendar
+     *
      * @param month Month to navigate to
      */
     @Step("Navigate to {month}")
@@ -75,6 +75,7 @@ public class CalendarComponent {
 
     /**
      * Selects a specific date in the calendar
+     *
      * @param date Date to select in format supported by DateHelper.formatDateForCalendar
      */
     @Step("Select {date} in Calendar")
@@ -86,9 +87,14 @@ public class CalendarComponent {
             date = today; // Use today's date if the requested date is in the past
         }
 
-        // Format day and month/year separately to avoid issues with split
+        // Get locale from the LanguageHelper
+        Locale locale = LanguageHelper.getLocale();
+
+        // Format day
         String targetDate = date.format(DateTimeFormatter.ofPattern("d").withLocale(locale));
-        String targetMonthAndYear = date.format(DateTimeFormatter.ofPattern("MMMM yyyy").withLocale(locale));
+
+        // Get localized month-year format using helper method
+        String targetMonthAndYear = formatMonthYearForCalendar(date, locale);
 
         log.info("Selecting date: {} (day: {}, month/year: {})", date, targetDate, targetMonthAndYear);
 
@@ -116,8 +122,9 @@ public class CalendarComponent {
 
     /**
      * Selects both departure and return dates with validation
+     *
      * @param departureDate Departure date
-     * @param returnDate Return date
+     * @param returnDate    Return date
      */
     @Step("Select departure date {departureDate} and return date {returnDate}")
     public void selectDepartureAndReturnDates(LocalDate departureDate, LocalDate returnDate) {
@@ -134,8 +141,9 @@ public class CalendarComponent {
 
     /**
      * Selects departure date and calculates return date based on duration
+     *
      * @param departureDate Departure date
-     * @param durationDays Number of days to add for the return date
+     * @param durationDays  Number of days to add for the return date
      */
     @Step("Select departure date {departureDate} with duration of {durationDays} days")
     public void selectDepartureAndDuration(LocalDate departureDate, int durationDays) {
@@ -156,6 +164,7 @@ public class CalendarComponent {
 
     /**
      * Checks if the calendar panel is visible
+     *
      * @return true if visible, false otherwise
      */
     public boolean isCalendarVisible() {
@@ -164,6 +173,7 @@ public class CalendarComponent {
 
     /**
      * Gets the appropriate DateTimeFormatter based on the current language setting
+     *
      * @return DateTimeFormatter configured for the current language
      */
     private DateTimeFormatter getLocalizedDateFormatter() {
@@ -179,5 +189,24 @@ public class CalendarComponent {
 
         // Use a consistent pattern but let the Locale handle the month names and formatting
         return DateTimeFormatter.ofPattern(Constants.TIME_FORMAT_CURRENT_DATE).withLocale(locale);
+    }
+
+    /**
+     * Formats month and year based on locale for calendar display
+     *
+     * @param date   The date to format
+     * @param locale The locale to use for formatting
+     * @return Properly formatted month-year string for the calendar UI
+     */
+    private String formatMonthYearForCalendar(LocalDate date, Locale locale) {
+        // Check if we need to inspect the actual UI to determine the format
+        // This could be extended to handle more locales or to dynamically determine the format
+        return switch (locale.getLanguage()) {
+            case "vi" ->
+                // For Vietnamese: "Tháng MM yyyy"
+                    "tháng " + date.format(DateTimeFormatter.ofPattern("MM yyyy").withLocale(locale));
+            default -> // For English and other languages: "MMMM yyyy" (keep original case)
+                    date.format(DateTimeFormatter.ofPattern("MMMM yyyy").withLocale(locale));
+        };
     }
 }
