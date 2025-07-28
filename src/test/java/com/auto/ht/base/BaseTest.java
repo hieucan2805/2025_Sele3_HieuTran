@@ -1,5 +1,6 @@
 package com.auto.ht.base;
 
+import com.auto.ht.helpers.ProjectHelper;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
@@ -22,6 +23,10 @@ public class BaseTest {
 
     @BeforeMethod
     public void setup() {
+        // Set base URL from the project configuration
+        String projectName = ProjectHelper.getCurrentProject();
+        Configuration.baseUrl = ProjectHelper.getBaseUrl();
+
         // Use Selenide's Configuration.remote directly instead of reading from properties file
         String remoteUrl = Configuration.remote;
 
@@ -35,7 +40,8 @@ public class BaseTest {
             Configuration.remote = null;
         }
 
-        log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={},  headless={}, pageLoadStrategy={}, remote={}",
+        log.info("Configuration: projectName={}, browser={}, browserSize={}, timeout={}, baseUrl={},  headless={}, pageLoadStrategy={}, remote={}",
+                projectName,
                 Configuration.browser,
                 Configuration.browserSize,
                 Configuration.timeout,

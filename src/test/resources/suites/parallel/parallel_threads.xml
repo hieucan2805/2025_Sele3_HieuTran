@@ -8,13 +8,13 @@
     <test name="Test 1">
         <parameter name="browser" value="chrome"/>
         <classes>
-            <class name="com.auto.ht.projects.vietjet.Case001Test"/>
+            <class name="com.auto.ht.projects.vietjet.dumpTC.Case001Test"/>
         </classes>
     </test>
     <test name="Test 2">
         <parameter name="browser" value="chrome"/>
         <classes>
-            <class name="com.auto.ht.projects.vietjet.Case002Test"/>
+            <class name="com.auto.ht.projects.vietjet.dumpTC.Case002Test"/>
         </classes>
     </test>
 </suite>

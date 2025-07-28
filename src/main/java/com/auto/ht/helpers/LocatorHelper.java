@@ -1,4 +1,4 @@
-package com.auto.ht.utils;
+package com.auto.ht.helpers;
 
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
@@ -10,12 +10,12 @@ import java.nio.charset.StandardCharsets;
 public class LocatorHelper {
     private final ResourceBundle localBundle;
 
-    protected final String language = LanguageHelper.getLanguage();
+    protected final String languageCode = LanguageHelper.getLanguageCode();
 
     // Initialize by loading the localization files with UTF-8 support
     public LocatorHelper(String page) {
         String bundleName = "localization/" + page.toLowerCase();
-        Locale locale = Locale.forLanguageTag(language);
+        Locale locale = Locale.forLanguageTag(languageCode);
         ResourceBundle bundle;
         try {
             String resourcePath = bundleName + "_" + locale.getLanguage() + ".properties";
