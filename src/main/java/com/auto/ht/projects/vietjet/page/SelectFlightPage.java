@@ -2,7 +2,6 @@ package com.auto.ht.projects.vietjet.page;
 
 import com.auto.ht.helpers.LanguageHelper;
 import com.auto.ht.helpers.LocatorHelper;
-import com.auto.ht.helpers.iFrameHelper;
 import com.auto.ht.utils.Constants;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
@@ -83,7 +82,7 @@ public class SelectFlightPage extends BasePage {
     public void selectLowestPriceTicket() {
         try {
             waitLoadingIconDisappear();
-            // Instead of using the old handleInterceptingFrames method,
+            // Instead of using the old handleInterceptingFrames method, 
             // we directly interact with elements in the main document
             // as we no longer try to generically handle frames
 

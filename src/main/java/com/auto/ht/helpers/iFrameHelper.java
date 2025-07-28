@@ -18,10 +18,10 @@ import static com.codeborne.selenide.Selenide.*;
  */
 public class iFrameHelper {
     private static final Logger log = LoggerFactory.getLogger(iFrameHelper.class);
-
+    
     /**
      * Switches to a frame using its CSS selector
-     *
+     * 
      * @param frameSelector CSS selector for the frame
      * @return true if successfully switched to frame
      */
@@ -39,7 +39,7 @@ public class iFrameHelper {
 
     /**
      * Switches to a frame by index
-     *
+     * 
      * @param index Index of the frame (0-based)
      * @return true if successfully switched to frame
      */
@@ -56,7 +56,7 @@ public class iFrameHelper {
 
     /**
      * Switches to a frame and performs an action, then switches back to the parent
-     *
+     * 
      * @param frameSelector CSS selector for the frame
      * @param action Lambda function containing the actions to perform in the frame
      */
@@ -75,10 +75,10 @@ public class iFrameHelper {
             switchTo().defaultContent(); // Safety measure to return to main document
         }
     }
-
+    
     /**
      * Switches to a frame, performs an action that returns a result, then switches back
-     *
+     * 
      * @param <T> Type of the result
      * @param frameSelector CSS selector for the frame
      * @param supplier Lambda function returning a value from operations in the frame
@@ -101,7 +101,7 @@ public class iFrameHelper {
             return null;
         }
     }
-
+    
     /**
      * Switches back to the main document (out of all frames)
      */
