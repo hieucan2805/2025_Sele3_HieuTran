@@ -51,22 +51,46 @@ public class WebDriverManager {
      * @return true if the browser is available, false otherwise
      */
     private boolean isBrowserAvailable(String browserName) {
-        // Default paths for common browsers on Linux
-        String binaryPath = switch (browserName) {
-            case "chrome" -> "/usr/bin/google-chrome";
-            case "firefox" -> "/usr/bin/firefox";
-            case "edge" -> "/usr/bin/msedge";
-            default -> null;
-        };
+        // Get the operating system
+        String os = System.getProperty("os.name").toLowerCase();
+        String binaryPath = null;
 
+        if (os.contains("linux")) {
+            // Linux paths
+            binaryPath = switch (browserName) {
+                case "chrome" -> "/usr/bin/google-chrome";
+                case "firefox" -> "/usr/bin/firefox";
+                case "edge" -> "/usr/bin/msedge";
+                default -> null;
+            };
+        } else if (os.contains("windows")) {
+            // Windows paths - typically in Program Files
+            binaryPath = switch (browserName) {
+                case "chrome" -> "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+                case "firefox" -> "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
+                case "edge" -> "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
+                default -> null;
+            };
+        } else if (os.contains("mac") || os.contains("darwin")) {
+            // macOS paths
+            binaryPath = switch (browserName) {
+                case "chrome" -> "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+                case "firefox" -> "/Applications/Firefox.app/Contents/MacOS/firefox";
+                case "edge" -> "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge";
+                default -> null;
+            };
+        }
+
+        // If no path found or browser not supported
         if (binaryPath == null) {
+            log.warn("No known path for browser '{}' on {} OS", browserName, os);
             return false;
         }
 
         // Check if the binary exists
         boolean available = new java.io.File(binaryPath).exists();
         if (!available) {
-            log.warn("Browser binary not found at expected path: {}", binaryPath);
+            log.warn("Browser binary '{}' not found at expected path: {}", browserName, binaryPath);
         }
 
         return available;
@@ -184,8 +208,25 @@ public class WebDriverManager {
         FirefoxOptions options = new FirefoxOptions();
         FirefoxProfile profile = new FirefoxProfile();
 
-        // Explicitly set Firefox binary path
-        options.setBinary("/usr/bin/firefox");
+        // Set Firefox binary path based on OS
+        String os = System.getProperty("os.name").toLowerCase();
+        String firefoxPath = null;
+
+        if (os.contains("linux")) {
+            firefoxPath = "/usr/bin/firefox";
+        } else if (os.contains("windows")) {
+            firefoxPath = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
+        } else if (os.contains("mac") || os.contains("darwin")) {
+            firefoxPath = "/Applications/Firefox.app/Contents/MacOS/firefox";
+        }
+
+        // Only set binary if the path exists
+        if (firefoxPath != null && new java.io.File(firefoxPath).exists()) {
+            options.setBinary(firefoxPath);
+            log.info("Configured Firefox with binary path: {}", firefoxPath);
+        } else {
+            log.info("Using system default Firefox binary");
+        }
 
         // Configure Firefox profile preferences
         profile.setPreference("browser.cache.disk.enable", false);
@@ -201,7 +242,6 @@ public class WebDriverManager {
             options.addArguments("-headless");
         }
 
-        log.info("Configured Firefox with binary path: /usr/bin/firefox");
         return options;
     }
 
