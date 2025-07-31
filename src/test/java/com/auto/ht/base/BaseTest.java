@@ -1,54 +1,44 @@
 package com.auto.ht.base;
 
+import com.auto.ht.config.TestConfiguration;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.WebDriverRunner;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import com.google.common.collect.ImmutableMap;
 import io.qameta.allure.selenide.AllureSelenide;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
 
 import static com.codeborne.selenide.Selenide.getUserAgent;
-import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static com.codeborne.selenide.WebDriverRunner.isHeadless;
 import static com.github.automatedowl.tools.AllureEnvironmentWriter.allureEnvironmentWriter;
 import static java.lang.invoke.MethodHandles.lookup;
 
+//@Listeners(TestCleanupListener.class)
 public class BaseTest {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
 
     @BeforeMethod
-    public void setup() {
-        // Use Selenide's Configuration.remote directly instead of reading from properties file
-        String remoteUrl = Configuration.remote;
+    @Parameters({"language"})
+    public void setup(@Optional("vi") String language) {
+        // Get the current test method name
+        String testMethodName = Thread.currentThread().getStackTrace()[2].getMethodName();
 
-        // Configure Selenide to use Selenium Grid if remoteUrl is provided
-        if (remoteUrl != null && !remoteUrl.isEmpty() && !remoteUrl.equalsIgnoreCase("false")) {
-            log.info("Setting up Grid execution with browser: {}, remoteUrl: {}", Configuration.browser, remoteUrl);
-            configureSeleniumGrid(Configuration.browser, remoteUrl);
-        } else {
-            log.info("Setting up local execution with browser: {}", Configuration.browser);
-            // Important: Set remote to null for local execution
-            Configuration.remote = null;
-        }
+        // Initialize configuration from properties and set up WebDriver
+        TestConfiguration.initializeConfiguration(getClass().getName(), testMethodName, language);
 
-        log.info("Selenide Configuration: browser={}, browserSize={}, timeout={}, baseUrl={},  headless={}, pageLoadStrategy={}, remote={}",
-                Configuration.browser,
-                Configuration.browserSize,
-                Configuration.timeout,
-                Configuration.baseUrl,
-                Configuration.headless,
-                Configuration.pageLoadStrategy,
-                Configuration.remote);
-
+        // Setup Allure reporting
         SelenideLogger.addListener("AllureSelenide", new AllureSelenide().screenshots(true).savePageSource(true));
-        log.info("Thread ID: {} - Starting {} test method in {}",
+        log.info("Thread ID: {} - Starting {} test method in {} with language: {}",
                 Thread.currentThread().threadId(),
                 getClass().getName(),
-                Configuration.browser);
+                Configuration.browser,
+                language);
     }
 
     @AfterMethod
@@ -57,56 +47,28 @@ public class BaseTest {
             log.info("Thread ID: {} - Finishing test method and cleaning up", Thread.currentThread().threadId());
 
             // Only write environment data if WebDriver exists
-            if (getWebDriver() != null) {
+            if (WebDriverRunner.getWebDriver() != null) {
                 allureEnvironmentWriter(
                         ImmutableMap.<String, String>builder()
                                 .put("BASE_URL", Configuration.baseUrl)
-                                .put("WebDriver", String.valueOf(getWebDriver()))
+                                .put("WebDriver", String.valueOf(WebDriverRunner.getWebDriver()))
                                 .put("UserAgent", getUserAgent())
                                 .put("isHeadless", String.valueOf(isHeadless()))
                                 .put("Remote", String.valueOf(Configuration.remote != null))
                                 .build(), System.getProperty("user.dir") + "/allure-results/");
             }
+
         } catch (Exception e) {
             log.error("Error in tearDown: {}", e.getMessage());
         } finally {
-            // Close the browser after each test
-            Selenide.closeWebDriver();
-        }
-    }
-
-    /**
-     * Configures Selenide to run tests on Selenium Grid with browser-specific capabilities
-     *
-     * @param browser the browser to use (chrome, edge)
-     * @param remoteUrl the Selenium Grid URL to connect to
-     */
-    private void configureSeleniumGrid(String browser, String remoteUrl) {
-        Configuration.remote = remoteUrl;
-
-        // Set up browser-specific capabilities
-        if (browser != null) {
-            DesiredCapabilities capabilities = new DesiredCapabilities();
-
-            switch (browser.toLowerCase()) {
-                case "edge":
-                    capabilities.setBrowserName("Microsoft Edge");
-                    capabilities.setCapability("enableVNC", true);
-                    capabilities.setCapability("enableVideo", false);
-                    Configuration.browserCapabilities = capabilities;
-                    break;
-                case "chrome":
-                    capabilities.setBrowserName("Google Chrome");
-                    capabilities.setCapability("enableVNC", true);
-                    capabilities.setCapability("enableVideo", false);
-                    Configuration.browserCapabilities = capabilities;
-                    break;
-                default:
-                    log.warn("Unsupported browser: {}", browser);
-                    break;
+            // Only close browser if it was started
+            try {
+                if (WebDriverRunner.getWebDriver() != null) {
+                    Selenide.closeWebDriver();
+                }
+            } catch (Exception ignored) {
+                // No webdriver to close
             }
-        } else {
-            log.warn("Browser must be specified when using grid");
         }
     }
 }
