@@ -27,8 +27,26 @@ public class TestConfiguration {
      * @param testMethodName The name of the test method
      */
     public static void initializeConfiguration(String testClassName, String testMethodName) {
+        initializeConfiguration(testClassName, testMethodName, null);
+    }
+
+    /**
+     * Initializes the test configuration from properties files with specific language
+     *
+     * @param testClassName The name of the test class
+     * @param testMethodName The name of the test method
+     * @param language The language to use for this test (en/vi)
+     */
+    public static void initializeConfiguration(String testClassName, String testMethodName, String language) {
         // Load properties and configure Selenide
         loadProperties();
+
+        // Set language if provided
+        if (language != null && !language.isEmpty()) {
+            log.info("Setting language for test: {}", language);
+            System.setProperty("selenide.language", language);
+        }
+
         handleProjectSpecificUrl();
         logConfiguration();
 

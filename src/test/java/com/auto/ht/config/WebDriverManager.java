@@ -245,13 +245,21 @@ public class WebDriverManager {
         return options;
     }
 
-//    /**
-//     * Configures Selenide to run tests on Selenium Grid with browser-specific capabilities
-//     *
-//     * @param browser the browser to use (chrome, edge)
-//     * @param remoteUrl the Selenium Grid URL to connect to
-//     */
-//    private void configureSeleniumGrid(String browser, String remoteUrl) {
-//        // Implementation for configuring Selenium Grid
-//    }
+    /**
+     * Configures Selenide to run tests on Selenium Grid with browser-specific capabilities
+     *
+     * @param browser the browser to use (chrome, edge)
+     * @param remoteUrl the Selenium Grid URL to connect to
+     */
+    private void configureSeleniumGrid(String browser, String remoteUrl) {
+        Configuration.remote = remoteUrl;
+        MutableCapabilities capabilities = switch (browser.toLowerCase()) {
+            case "chrome" -> new ChromeOptions();
+            case "edge" -> new EdgeOptions();
+            case "firefox" -> new FirefoxOptions();
+            default -> throw new IllegalArgumentException("Unsupported browser: " + browser);
+        };
+
+        Configuration.browserCapabilities = capabilities;
+    }
 }

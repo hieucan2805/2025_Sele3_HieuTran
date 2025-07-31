@@ -129,7 +129,7 @@ jobs:
         
 
       - name: Setup Selenium Grid
-        if: ${{ github.event.inputs.use_grid == true }}
+        if: ${{ github.event.inputs.use_grid == 'true' }}
         run: |
           SELENIUM_HUB_PORT=${{ steps.selenide_props.outputs.hub_port }}
           echo "Setting up Selenium Grid with port: $SELENIUM_HUB_PORT"
@@ -151,7 +151,7 @@ jobs:
           echo "SELENIUM_REMOTE_URL=http://localhost:${SELENIUM_HUB_PORT}/wd/hub" >> $GITHUB_ENV
 
       - name: Wait for Selenium Grid
-        if: ${{ github.event.inputs.use_grid == true }}
+        if: ${{ github.event.inputs.use_grid == 'true' }}
         run: |
           SELENIUM_HUB_PORT=${{ steps.selenide_props.outputs.hub_port }}
           echo "Waiting for Selenium Grid at http://localhost:${SELENIUM_HUB_PORT}/wd/hub/status ..."
@@ -235,7 +235,7 @@ jobs:
             allure-results/
             testng-report/
 
-      - name: Send test‑result email
+      - name: Send test-result email
         if: always()               # Both on success and failure
         uses: dawidd6/action-send-mail@v3
         with:

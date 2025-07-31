@@ -5,9 +5,16 @@
 <!--        <listener class-name="com.auto.listeners.htt.AllureListener"/>-->
         <listener class-name="com.auto.ht.projects.listeners.RetryListener"/>
     </listeners>
-    <test name="Selenide test">
+    <test name="English Test">
+        <parameter name="language" value="en"/>
         <classes>
             <class name="com.auto.ht.projects.vietjet.Case001Test"/>
+        </classes>
+    </test>
+    <test name="Vietnamese Test">
+        <parameter name="language" value="vi"/>
+        <classes>
+            <class name="com.auto.ht.projects.vietjet.Case002Test"/>
         </classes>
     </test>
 </suite>
